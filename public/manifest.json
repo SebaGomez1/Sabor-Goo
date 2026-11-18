@@ -1,0 +1,17 @@
+{
+  "name": "Sabor Goo · Comida Casera Abundante Maldonado",
+  "short_name": "Sabor Goo",
+  "description": "Platos caseros muy bien servidos, abundantes y contundentes en todo Maldonado y Playa Mansa (Paradas 1 a 25) con seguimiento en vivo del repartidor.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#ea580c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
