@@ -281,3 +281,15 @@ export default function OrderTrackingPage() {
 
           <div className="border-t border-slate-800 pt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
             <span className="text-slate-400 flex items-center gap-1.5">
+
+              Pago: <strong className="text-slate-200 uppercase">{order.payment_method}</strong>
+            </span>
+            <span className="text-lg font-black text-orange-400">
+              Total: ${order.total_uyu} UYU
+            </span>
+         </div>
+      </div>
+    </main>
+  </div>
+  );
+}
