@@ -4,11 +4,12 @@ import { calculateHaversineKm } from '@/lib/geo';
 import { buildWhatsAppOrderUrl } from '@/lib/whatsapp';
 
 export async function GET(req: NextRequest) {
+  const orderId = req.nextUrl.searchParams.get('id');
+  if (!orderId) {
+    return NextResponse.json({ error: 'Falta ID de pedido.' }, { status: 400 });
+  }
+
   try {
-    const orderId = req.nextUrl.searchParams.get('id');
-    if (!orderId) {
-      return NextResponse.json({ error: 'Falta ID de pedido.' }, { status: 400 });
-    }
 
     const supabase = getSupabaseAdmin();
     const [{ data: order, error }, { data: settings }] = await Promise.all([
