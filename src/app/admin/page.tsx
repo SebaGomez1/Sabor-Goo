@@ -15,6 +15,11 @@ import {
   Play,
   Square,
   Plus,
+  QrCode,
+  Copy,
+  Check,
+  Download,
+  X,
 } from 'lucide-react';
 import { AdminAccountPublic, AppSettings, MenuItem, OrderRecord, VehicleType } from '@/types';
 import { RouteStopEstimate } from '@/lib/logistics';
@@ -49,7 +54,9 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [submittingLogin, setSubmittingLogin] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'pedidos' | 'ruta' | 'menus' | 'finanzas' | 'motores'>('pedidos');
+    const [activeTab, setActiveTab] = useState<'pedidos' | 'ruta' | 'menus' | 'finanzas' | 'motores'>('pedidos');
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copiedQrUrl, setCopiedQrUrl] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [routeSchedule, setRouteSchedule] = useState<RouteStopEstimate[]>([]);
@@ -380,15 +387,96 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl text-slate-200"
-          >
-            <LogOut className="w-4 h-4" />
-            Salir
-          </button>
+                    <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowQrModal(true)}
+              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow transition"
+            >
+              <QrCode className="w-4 h-4" />
+              QR Web
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl text-slate-200"
+            >
+              <LogOut className="w-4 h-4" />
+              Salir
+            </button>
+          </div>
         </div>
+
+        {showQrModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="font-black text-base text-white flex items-center gap-2">
+                  <QrCode className="w-5 h-5 text-amber-400" />
+                  Código QR de la Web
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(false)}
+                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-400">
+                Escaneá este código para ir directo al menú y hacer pedidos al instante.
+              </p>
+
+              {(() => {
+                const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                const qrImageUrl = `https://qrserver.com{encodeURIComponent(siteUrl)}`;
+                return (
+                  <>
+                    <div className="bg-white p-4 rounded-2xl inline-block mx-auto shadow-inner">
+                      <img
+                        src={qrImageUrl}
+                        alt="Código QR Sabor Goo"
+                        className="w-52 h-52 object-contain"
+                      />
+                    </div>
+
+                    <div className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono break-all">
+                      {siteUrl}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(siteUrl);
+                          setCopiedQrUrl(true);
+                          setTimeout(() => setCopiedQrUrl(false), 2000);
+                        }}
+                        className="inline-flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition"
+                      >
+                        {copiedQrUrl ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                        {copiedQrUrl ? '¡Copiado!' : 'Copiar Link'}
+                      </button>
+
+                      <a
+                        href={qrImageUrl}
+                        download="qr-chiveteria.png"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition"
+                      >
+                        <Download className="w-4 h-4" />
+                        Descargar QR
+                      </a>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
 
         <div className="max-w-6xl mx-auto px-4 pb-3 flex flex-wrap gap-2">
           {[
