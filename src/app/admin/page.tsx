@@ -21,6 +21,7 @@ import {
   Download,
   X,
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { AdminAccountPublic, AppSettings, MenuItem, OrderRecord, VehicleType } from '@/types';
 import { RouteStopEstimate } from '@/lib/logistics';
 import { playSoftAlertChime } from '@/components/PwaOneTapInstaller';
@@ -55,8 +56,21 @@ export default function AdminPage() {
   const [submittingLogin, setSubmittingLogin] = useState(false);
 
     const [activeTab, setActiveTab] = useState<'pedidos' | 'ruta' | 'menus' | 'finanzas' | 'motores'>('pedidos');
-  const [showQrModal, setShowQrModal] = useState(false);
+    const [showQrModal, setShowQrModal] = useState(false);
   const [copiedQrUrl, setCopiedQrUrl] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+
+  useEffect(() => {
+    if (!showQrModal || typeof window === 'undefined') return;
+    QRCode.toDataURL(window.location.origin, {
+      width: 600,
+      margin: 2,
+      color: { dark: '#020617', light: '#ffffff' },
+    })
+      .then((url) => setQrDataUrl(url))
+      .catch(() => setQrDataUrl(''));
+  }, [showQrModal]);
+
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [routeSchedule, setRouteSchedule] = useState<RouteStopEstimate[]>([]);
@@ -429,17 +443,22 @@ export default function AdminPage() {
                 Escaneá este código para ir directo al menú y hacer pedidos al instante.
               </p>
 
-              {(() => {
-                const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
-                const qrImageUrl = `https://qrserver.com{encodeURIComponent(siteUrl)}`;
+                            {(() => {
+                const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sabor-goo.vercel.app';
                 return (
                   <>
                     <div className="bg-white p-4 rounded-2xl inline-block mx-auto shadow-inner">
-                      <img
-                        src={qrImageUrl}
-                        alt="Código QR Sabor Goo"
-                        className="w-52 h-52 object-contain"
-                      />
+                      {qrDataUrl ? (
+                        <img
+                          src={qrDataUrl}
+                          alt="Código QR Sabor Goo"
+                          className="w-52 h-52 object-contain"
+                        />
+                      ) : (
+                        <div className="w-52 h-52 flex items-center justify-center text-xs text-slate-500">
+                          Generando QR...
+                        </div>
+                      )}
                     </div>
 
                     <div className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono break-all">
@@ -460,20 +479,28 @@ export default function AdminPage() {
                         {copiedQrUrl ? '¡Copiado!' : 'Copiar Link'}
                       </button>
 
-                      <a
-                        href={qrImageUrl}
-                        download="qr-chiveteria.png"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition"
+                      <button
+                        type="button"
+                        disabled={!qrDataUrl}
+                        onClick={() => {
+                          if (!qrDataUrl) return;
+                          const link = document.createElement('a');
+                          link.href = qrDataUrl;
+                          link.download = 'qr-chiveteria-sabor-goo.png';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="inline-flex items-center justify-center gap-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition"
                       >
                         <Download className="w-4 h-4" />
                         Descargar QR
-                      </a>
+                      </button>
                     </div>
                   </>
                 );
               })()}
+
             </div>
           </div>
         )}
