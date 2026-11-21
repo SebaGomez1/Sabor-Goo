@@ -60,18 +60,50 @@ async function handleEngine1(req: NextRequest) {
       if (genData.reel) reelsToPublish = [genData.reel];
     }
   }
+  const { data: activeMenus } = await supabase
+    .from('menus')
+    .select('id, title, price_uyu, description, image_url')
+    .eq('is_active', true);
+
+  const hashtags = [
+    '#ChiviteriaMaldonado',
+    '#ChivitoUruguayo',
+    '#SaborGoo',
+    '#MaldonadoUruguay',
+    '#PuntaDelEste',
+    '#DeliveryMaldonado',
+    '#ChivitoAlInstante',
+  ];
 
   for (const reel of reelsToPublish) {
-    // Si hay webhook/API de publicación social conectado, enviarlo; siempre marcar publicado en cola
+    const matchedMenu =
+      (activeMenus || []).find((m) =>
+        reel.script_text?.toLowerCase().includes((m.title || '').toLowerCase())
+      ) ||
+      (activeMenus && activeMenus.length > 0
+        ? activeMenus[Math.floor(Math.random() * activeMenus.length)]
+        : null);
+
+        const socialCaption = matchedMenu
+      ? `🔥 ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) — ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}\n\n📲 Pedilo AL INSTANTE en nuestra web (link en bio) • 25% OFF pidiendo 3 días seguidos • ¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajás a 9, mantenés tu 25% OFF diario)!\n\n${hashtags.join(' ')}`
+      : `${reel.script_text}\n\n${hashtags.join(' ')}`;
+
+    // Si hay webhook/API de publicación social conectado, enviarlo con foto, precio y hashtags reales
     const socialWebhook = process.env.SOCIAL_PUBLISHER_WEBHOOK_URL;
     if (socialWebhook) {
       await fetch(socialWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          brand: 'Sabor Goo Maldonado',
+          brand: 'Sabor Goo · Chivetería Maldonado',
           reelId: reel.id,
           script: reel.script_text,
+          caption: socialCaption,
+          hashtags,
+          productTitle: matchedMenu?.title || 'Chivito Completo',
+          productPriceUyu: matchedMenu?.price_uyu || null,
+          productDescription: matchedMenu?.description || null,
+          productImageUrl: matchedMenu?.image_url || null,
           voiceoverSsml: reel.voiceover_ssml,
           subtitles: reel.subtitles_json,
           videoPrompt: reel.video_prompt,

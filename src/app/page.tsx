@@ -136,7 +136,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!bookingWindow?.countdownTargetIso) return;
-    const targetMs = new Date(bookingWindow.countdownTargetIso).getTime();
+    const targetMs = new Date('2026-11-21T11:00:00-03:00').getTime();
 
     const updateTimer = () => {
       const diff = Math.max(0, targetMs - Date.now());
@@ -303,7 +303,7 @@ export default function HomePage() {
     { day: 5, label: 'Viernes' },
   ];
 
-  const filteredMenus = menus.filter((m) => m.day_of_week === selectedDay && m.is_active);
+  const LAUNCH_CATALOG: MenuItem[] = [{id:'chivito-pan-1',day_of_week:1,day_label:'Chivetería',title:'Chivito al pan para 1',description:'Carne nalga de ternera, jamón, lechuga, tomate, panceta, huevo frito, aderezos y papas fritas',abundance_badge:'Hecho al instante',category:'menu_diario',price_uyu:620,ingredient_cost_uyu:0,image_url:'/menus/chivito-pan.jpg',daily_stock:99,is_active:true},{id:'chivito-plato-1',day_of_week:1,day_label:'Chivetería',title:'Chivito al plato para 1',description:'Carne de nalga de ternera, lechuga, tomate, jamón, panceta, huevo frito, muzzarella, papas fritas, mixta y rusa',abundance_badge:'Hecho al instante',category:'menu_diario',price_uyu:790,ingredient_cost_uyu:0,image_url:'/menus/chivito-plato.jpg',daily_stock:99,is_active:true},{id:'hamburguesa-especial-1',day_of_week:1,day_label:'Hamburguesas',title:'Hamburguesa especial de carne picada',description:'Carne picada, lechuga, tomate, jamón, queso muzza, huevo frito, panceta, con fritas',abundance_badge:'Hecho al instante',category:'hamburguesa',price_uyu:480,ingredient_cost_uyu:0,image_url:'/menus/hamburguesa-especial.jpg',daily_stock:99,is_active:true},{id:'napolitana-1',day_of_week:1,day_label:'Minutas',title:'Napolitana para 1',description:'Mila de carne o pollo, salsa, muzza, jamón, huevo frito y guarnición',abundance_badge:'Hecho al instante',category:'menu_diario',price_uyu:720,ingredient_cost_uyu:0,image_url:'/menus/napolitana.jpg',daily_stock:99,is_active:true},{id:'hamburguesa-clasica-1',day_of_week:1,day_label:'Hamburguesas',title:'Hamburguesa común de carne picada',description:'Carne picada, lechuga, tomate, huevo duro y aderezos',abundance_badge:'Hecho al instante',category:'hamburguesa',price_uyu:280,ingredient_cost_uyu:0,image_url:'/menus/hamburguesa-clasica.jpg',daily_stock:99,is_active:true}];const filteredMenus = LAUNCH_CATALOG;
 
   function addItem(menuId: string) {
     setCart((prev) => ({ ...prev, [menuId]: (prev[menuId] || 0) + 1 }));
@@ -355,7 +355,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="max-w-6xl mx-auto px-4 pt-8 pb-6">
+      <section className="max-w-6xl mx-auto px-4 pt-6 pb-2"><div className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-orange-600/20 to-amber-500/20 border-2 border-amber-400/60 p-5 md:p-7 text-center shadow-2xl space-y-3"><div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500 text-slate-950 font-black text-xs md:text-sm uppercase tracking-wider">🚀 LANZAMIENTO · 21/11/2026 a las 11:00 AM</div><h2 className="text-2xl md:text-4xl font-black text-white">Cuenta regresiva para el gran estreno</h2><div className="font-mono text-3xl md:text-5xl font-black text-amber-300 tracking-wider">{countdownText}</div><p className="text-xs md:text-sm text-amber-100/95 bg-slate-950/70 border border-amber-400/30 rounded-2xl px-4 py-2.5 max-w-2xl mx-auto">🛠️ <strong>Aviso:</strong> Estamos ultimando detalles y cargando mejoras en la app. Si notás que falta alguna sección, ¡no te preocupes! Tendremos todo 100% listo para el horario de lanzamiento.</p></div></section><section className="max-w-6xl mx-auto px-4 pt-8 pb-6">
         <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-orange-950/40 border border-slate-800 p-6 md:p-10 shadow-2xl">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-300 text-xs font-bold mb-4">
             <Flame className="w-4 h-4 text-orange-400" />

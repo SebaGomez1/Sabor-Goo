@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret, getAdminFromRequest } from '@/lib/auth';
-import { resolveNextBookingWindow } from '@/lib/logistics';
 
-function buildHumanVoiceSsml(plainText: string): string {
-  const escaped = plainText
+function buildHumanVoiceSsml(plaintext: string): string {
+  const escaped = plaintext
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -43,47 +42,52 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const supabase = getSupabaseAdmin();
 
-    const [{ data: menus }, { data: settings }] = await Promise.all([
-      supabase
-        .from('menus')
-        .select('day_label, title, price_uyu, description')
-        .eq('is_active', true)
-        .order('day_of_week', { ascending: true }),
-      supabase.from('app_settings').select('*').eq('id', 1).single(),
-    ]);
+    const { data: menus } = await supabase
+      .from('menus')
+      .select('id, title, price_uyu, description, image_url')
+      .eq('is_active', true);
 
-    const booking = resolveNextBookingWindow(settings?.cutoff_hour ?? 21);
+    const activeMenus = menus || [];
     const featuredMenu =
-      menus?.find((m) => m.day_label.toLowerCase().startsWith(booking.targetDayLabel.slice(0, 5).toLowerCase())) ||
-      menus?.at(0);
+      (body.menuId ? activeMenus.find((m) => m.id === body.menuId) : null) ||
+      (activeMenus.length > 0
+        ? activeMenus[Math.floor(Math.random() * activeMenus.length)]
+        : null);
+
+    const productTitle = featuredMenu?.title || 'Chivito Completo de la Casa';
+    const productPrice = featuredMenu?.price_uyu || 450;
+    const productDesc =
+      featuredMenu?.description ||
+      'Carne tierna a la plancha, jamón, muzzarella fundida, panceta crocante, huevo, lechuga, tomate y papas fritas.';
 
     const audiences = [
-      'Trabajadores de obras y construcción en Maldonado y Playa Mansa',
-      'Equipos de oficinas, comercios y estudios en Maldonado Centro',
-      'Personal de sanatorios, hospitales y clínicas de Maldonado',
+      'Amantes de los buenos chivitos en Maldonado y Punta del Este',
+      'Juntadas con amigos, parejas y familias con ganas de comer rico al instante',
+      'Vecinos y turistas en Maldonado y Playa Mansa buscando chivetería artesanal',
     ];
     const targetAudience =
       body.targetAudience || audiences[Math.floor(Math.random() * audiences.length)];
 
     let scriptText = '';
-    const openaiKey = process.env.OPENAI_API_KEY;
+    const openAiKey = process.env.OPENAI_API_KEY;
 
-    if (openaiKey) {
-      const prompt = `Escribe un guion corto de 25 segundos para un Reel vertical (TikTok/Instagram) de "Sabor Goo" en Maldonado, Uruguay.
+    if (openAiKey) {
+      const prompt = `Escribe un guion corto de 25 segundos para un Reel vertical (TikTok/Instagram) de la chivetería "Sabor Goo" en Maldonado, Uruguay.
 Público objetivo: ${targetAudience}.
-Plato destacado: ${featuredMenu?.title || 'Menú Casero Abundante'} a $${featuredMenu?.price_uyu || 300} UYU.
-Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y enérgico:
-1. Bandejas caseras muy bien servidas, abundantes y contundentes, sin escatimar.
-2. Si comprás 3 días hábiles seguidos tenés 25% OFF desde el cuarto día.
-3. Si juntás 10 compañeros de obra, oficina o sanatorio con tu link, comés GRATIS todos los días.
-4. Reparto en todo Maldonado y Playa Mansa Paradas 1 a 25 con seguimiento en vivo del repartidor.
-5. Reserva antes de las 21:00 hs.
-PROHIBIDO mencionar la palabra bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre paréntesis.`;
+Producto destacado real del menú: "${productTitle}" a $${productPrice} UYU.
+Descripción real del producto: ${productDesc}.
+Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y tentador:
+1. Pedidos al instante: lo pedís ahora y te llega calentito directo a tu puerta, sin esperar al otro día.
+2. Menciona el nombre exacto "${productTitle}", su precio de $${productPrice} pesos y sus ingredientes reales.
+3. Si pedís 3 días seguidos tenés 25% OFF desde el cuarto día.
+4. 4. Mientras mantengas 10 referidos activos comprando con tu link (en el día o a diario), comés GRATIS (y si bajás a 9 activos, seguís disfrutando el 25% OFF por compra diaria).
+5. Reparto en todo Maldonado y Playa Mansa Paradas 1 a 25 con seguimiento en vivo del repartidor.
+PROHIBIDO mencionar viandas, encargues del día anterior, ni las palabras bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre paréntesis.`;
 
       const res = await fetch('https://openai.com', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${openaiKey}`,
+          Authorization: `Bearer ${openAiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -101,12 +105,14 @@ PROHIBIDO mencionar la palabra bici o bicicleta. Devuelve SOLO el texto hablado,
     }
 
     if (!scriptText) {
-      scriptText = `¿Laburando a full en Maldonado y cansado de viandas chicas que te dejan con hambre? En Sabor Goo servimos platos caseros abundantes de verdad, bandeja llena sin escatimar. Probá nuestro ${featuredMenu?.title || 'menú casero del día'} por solo $${featuredMenu?.price_uyu || 300} pesos. Además, si pedís 3 días seguidos tenés 25% de descuento desde el cuarto día, y si compartís tu link con 10 compañeros de obra, oficina o sanatorio, ¡tu comida diaria te sale totalmente gratis! Llegamos a todo Maldonado y Playa Mansa de Parada 1 a 25 con seguimiento en vivo del repartidor hasta tu puerta. Entrá ya y reservá antes de las 9 de la noche.`;
+     scriptText = `¿Antojo de un verdadero chivito uruguayo en Maldonado? Pedilo ahora en Sabor Goo y te lo llevamos calentito al instante. Probá nuestro ${productTitle}: ${productDesc}, por solo $${productPrice} pesos. Además, si pedís 3 días seguidos tenés 25% de descuento desde el cuarto día, y mientras mantengas 10 referidos activos comprando con tu link en el día o a diario, ¡tu pedido te sale totalmente gratis! (Y si bajás a 9 activos, mantenés tu 25% OFF por compra diaria). Llegamos a todo Maldonado y Playa Mansa de Parada 1 a 25 con seguimiento en vivo del repartidor hasta tu puerta. ¡Entrá ya y pedí el tuyo ahora mismo!`;
     }
 
     const voiceoverSsml = buildHumanVoiceSsml(scriptText);
     const subtitlesJson = buildDynamicSubtitles(scriptText);
-    const videoPrompt = `Vertical 9:16 HD gastronomic close-up shot of generous homemade Uruguayan meal (${featuredMenu?.title || 'Milanesa Napolitana XXL'}), steaming hot, golden crispy textures, natural daylight, high appetite appeal, Maldonado Uruguay.`;
+    const videoPrompt = featuredMenu?.image_url
+      ? `Vertical 9:16 HD gastronomic motion reel based on real menu photo (${featuredMenu.image_url}) of "${productTitle}" ($${productPrice} UYU): ${productDesc}, steaming hot, melted cheese, crispy fries, Maldonado Uruguay.`
+      : `Vertical 9:16 HD gastronomic close-up shot of authentic Uruguayan chivito "${productTitle}" ($${productPrice} UYU), ${productDesc}, steaming hot, melted mozzarella, crispy fries, Maldonado Uruguay.`;
 
     const { data: reel, error } = await supabase
       .from('media_reels_queue')

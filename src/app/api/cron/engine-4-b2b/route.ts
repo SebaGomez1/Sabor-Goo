@@ -3,39 +3,39 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret } from '@/lib/auth';
 import { getMontevideoNow } from '@/lib/logistics';
 
-const B2B_CLUSTERS = [
+const CHIVITERIA_CLUSTERS = [
   {
-    placeName: 'Obras en Construcción · Av. Roosevelt y Paradas 1 a 12 Playa Mansa',
-    sector: 'obra',
+    placeName: 'Edificios, Apartamentos y Turistas · Av. Roosevelt y Paradas 1 a 12 Playa Mansa',
+    sector: 'residencial_turismo',
     zoneName: 'Playa Mansa (Paradas 1 a 12)',
     lat: -34.9435,
     lng: -54.9512,
   },
   {
-    placeName: 'Torres y Obras · Playa Mansa Paradas 13 a 25 y Pinares',
-    sector: 'obra',
+    placeName: 'Complejos y Vecinos · Playa Mansa Paradas 13 a 25 y Pinares',
+    sector: 'residencial',
     zoneName: 'Playa Mansa (Paradas 13 a 25)',
     lat: -34.9225,
     lng: -54.9765,
   },
   {
-    placeName: 'Sanatorios, Clínicas y Centros Médicos · Maldonado Centro',
-    sector: 'hospital',
-    zoneName: 'Maldonado Centro / Barrios',
-    lat: -34.9082,
-    lng: -54.9565,
-  },
-  {
-    placeName: 'Oficinas, Comercios y Estudios · Peatonal Sarandí y Av. Batlle',
-    sector: 'oficina',
+    placeName: 'Comercios, Estudios y Nocturnidad · Maldonado Centro y Peatonal Sarandí',
+    sector: 'centro_comercial',
     zoneName: 'Maldonado Centro / Barrios',
     lat: -34.9095,
     lng: -54.9590,
   },
   {
-    placeName: 'Talleres, Barracas y Depósitos · Cerro Pelado y Maldonado Nuevo',
-    sector: 'taller',
-    zoneName: 'Maldonado - Cerro Pelado / Maldonado Nuevo',
+    placeName: 'Clubes, Canchas de Fútbol 5 y Juntadas · Maldonado',
+    sector: 'deporte_juntadas',
+    zoneName: 'Maldonado Centro / Barrios',
+    lat: -34.9082,
+    lng: -54.9565,
+  },
+  {
+    placeName: 'Familias y Barrios · Cerro Pelado, Lausana y Maldonado Nuevo',
+    sector: 'barrios',
+    zoneName: 'Maldonado · Cerro Pelado y Maldonado Nuevo',
     lat: -34.8895,
     lng: -54.9620,
   },
@@ -47,7 +47,11 @@ async function runEngine4(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { data: settings } = await supabase.from('app_settings').select('*').eq('id', 1).single();
+  const [{ data: settings }, { data: activeMenus }] = await Promise.all([
+    supabase.from('app_settings').select('*').eq('id', 1).single(),
+    supabase.from('menus').select('title, price_uyu, description, image_url').eq('is_active', true),
+  ]);
+
   if (!settings?.engines_enabled) {
     return NextResponse.json({ skipped: true, reason: 'engines_disabled' });
   }
@@ -69,13 +73,23 @@ async function runEngine4(req: NextRequest) {
 
   // En modo emergencia expande a todos los clusters incluyendo toda Playa Mansa Paradas 1-25
   const selectedClusters = isEmergency13h
-    ? B2B_CLUSTERS
-    : [B2B_CLUSTERS[Math.floor(Math.random() * B2B_CLUSTERS.length)]];
+    ? CHIVITERIA_CLUSTERS
+    : [CHIVITERIA_CLUSTERS[Math.floor(Math.random() * CHIVITERIA_CLUSTERS.length)]];
 
+  const menusList = activeMenus || [];
   const insertedLeads = [];
 
   for (const cluster of selectedClusters) {
-    const pitchMessage = `¡Hola equipo de ${cluster.placeName}! En Sabor Goo preparamos viandas caseras muy bien servidas y abundantes (sin escatimar) con entrega puntual en ${cluster.zoneName} y seguimiento en vivo del repartidor. Beneficio Pedido Grupal: si 10 compañeros piden con tu link, ¡tu almuerzo diario te sale GRATIS! Reservá hoy antes de las 21:00 hs en ${appUrl}`;
+    const featured =
+      menusList.length > 0
+        ? menusList[Math.floor(Math.random() * menusList.length)]
+        : null;
+
+    const dishHighlight = featured
+      ? `Probá nuestro ${featured.title} ($${featured.price_uyu} UYU): ${featured.description || 'hecho al momento con ingredientes frescos'}.`
+      : 'Probá nuestros chivitos artesanales completos hechos al momento con papas fritas.';
+
+    const pitchMessage = `🔥 ¡Hola gente de ${cluster.placeName}! En Sabor Goo · Chivetería preparamos chivitos uruguayos al instante con entrega rápida en ${cluster.zoneName} y seguimiento en vivo del repartidor. ${dishHighlight} Beneficios: 25% OFF si pedís 3 días seguidos, y mientras mantengas 10 referidos activos comprando con tu link (en el día o a diario), ¡tu pedido te sale GRATIS! (Si bajás a 9 activos, seguís con tu 25% OFF por compra diaria). Pedilo ahora al instante en ${appUrl} #ChiviteriaMaldonado #ChivitoUruguayo #SaborGoo`;
 
     const { data: lead } = await supabase
       .from('social_leads_b2b')
@@ -95,11 +109,11 @@ async function runEngine4(req: NextRequest) {
   }
 
   await supabase.from('engine_logs').insert({
-    engine_name: 'Motor 4 · Captación B2B Geolocalizada',
+    engine_name: 'Motor 4 · Captación Chivetería Geolocalizada',
     mode: isEmergency13h ? 'emergency_13h' : 'normal',
     action_summary: isEmergency13h
-      ? `MODO EMERGENCIA 13:00-21:00 HS ACTIVO (${todayOrdersCount ?? 0}/${settings.daily_order_goal} pedidos): captación masiva duplicada en Playa Mansa Paradas 1-25 y todo Maldonado (${insertedLeads.length} frentes B2B).`
-      : `Campaña B2B generada para ${selectedClusters.at(0)?.placeName}.`,
+      ? `MODO EMERGENCIA 13:00–21:00 HS ACTIVO (${todayOrdersCount ?? 0}/${settings.daily_order_goal} pedidos): captación masiva de chivetería en Playa Mansa Paradas 1-25 y todo Maldonado (${insertedLeads.length} zonas).`
+      : `Campaña de chivetería al instante generada para ${selectedClusters.at(0)?.placeName}.`,
     metadata: { emergency: isEmergency13h, leadsCount: insertedLeads.length },
   });
 

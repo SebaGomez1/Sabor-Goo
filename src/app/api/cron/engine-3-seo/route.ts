@@ -19,11 +19,11 @@ async function runEngine3(req: NextRequest) {
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://vercel.app').replace(/\/$/, '');
 
-  const schemaMenu = {
+    const schemaMenu = {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
-    name: 'Sabor Goo Maldonado',
-    servesCuisine: 'Comida Casera Uruguaya Abundante',
+    name: 'Sabor Goo · Chivetería Maldonado',
+    servesCuisine: 'Chivetería Uruguaya Artesanal, Chivitos al Instante',
     areaServed: [
       'Maldonado, Uruguay',
       'Playa Mansa Parada 1 a Parada 25, Punta del Este, Uruguay',
@@ -35,6 +35,7 @@ async function runEngine3(req: NextRequest) {
         '@type': 'MenuItem',
         name: m.title,
         description: m.description,
+        ...(m.image_url ? { image: m.image_url } : {}),
         offers: {
           '@type': 'Offer',
           price: m.price_uyu,
