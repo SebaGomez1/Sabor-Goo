@@ -652,19 +652,12 @@ export default function AdminPage() {
       <h3 className="text-base font-black text-white tracking-tight">{menuForm.id ? 'Editar Producto' : 'Nuevo Producto en Catálogo'}</h3>
       <p className="text-11x text-slate-400">Configura imagen, precio, costo de producción y rentabilidad en tiempo real</p>
     </div>
-    <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: 'Carta', title: '', description: '', category: 'menu_diario', price_uyu: 350, ingredient_cost_uyu: 140, image_url: '/menus/chivito-pan.jpg', daily_stock: 30 })} className="text-11x text-slate-400 hover:text-white underline">Limpiar campos</button>
+    <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: 'Carta', title: '', description: '', category: 'menu_diario', price_uyu: 350, ingredient_cost_uyu: 140, image_url: '', daily_stock: 30 })} className="text-11x text-slate-400 hover:text-white underline">Limpiar campos</button>
   </div>
   <div className="grid lg:grid-cols-12 gap-6">
     <div className="lg:col-span-4 space-y-3">
       <span className="text-11x font-bold uppercase tracking-wider text-slate-400 block">Foto del Producto</span>
-      <label htmlFor="menu-photo-input" className="group relative flex flex-col items-center justify-center h-48 w-full rounded-xl border-2 border-dashed border-slate-700 hover:border-orange-500 bg-slate-950/60 overflow-hidden cursor-pointer transition">
-        {menuForm.image_url && <img src={menuForm.image_url} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-40 transition" />}
-        <div className="pointer-events-none relative z-10 flex flex-col items-center text-center p-4 bg-slate-950/70 rounded-xl backdrop-blur-sm">
-          <span className="text-xs font-bold text-white">{menuForm._uploading ? 'Subiendo imagen...' : 'Clic para subir foto'}</span>
-          <span className="text-10x text-slate-400 mt-1">JPG, PNG o WEBP (Óptimo 16:9)</span>
-        </div>
-�zn�ܩ
-      </label>
+v+�)br
       <input type="text" placeholder="O pega URL de imagen directa..." value={menuForm.image_url || ''} onChange={(e) => setMenuForm({ ...menuForm, image_url: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-11x text-slate-300" />
     </div>
     <div className="lg:col-span-8 space-y-4">
