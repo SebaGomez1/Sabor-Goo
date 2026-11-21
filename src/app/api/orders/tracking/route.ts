@@ -128,3 +128,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function POST(req: NextRequest){try{const b=await req.json();if(b.action==='client_acknowledged'&&b.orderId){const sb=getSupabaseAdmin();await sb.from('orders').update({notes:'CLIENT_ACK_ARRIVAL'}).eq('id',b.orderId);return NextResponse.json({ok:true,acknowledged:true});}return NextResponse.json({ok:false},{status:400});}catch{return NextResponse.json({ok:false},{status:500});}}

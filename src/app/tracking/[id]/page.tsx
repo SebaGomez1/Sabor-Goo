@@ -1,4 +1,5 @@
 'use client';
+import { startPedidosYaAlarm } from '@/components/PwaOneTapInstaller';
 
 import React, { Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -78,7 +79,7 @@ function OrderTrackingContent() {
           return;
         }
 
-        setOrder(data.order);
+        setOrder(data.order);if(data.order&&data.order.order_status==='arrived'&&data.order.notes!=='CLIENT_ACK_ARRIVAL'){startPedidosYaAlarm({title:'¡Llegó tu pedido Sabor Goo!',body:'El repartidor está en tu puerta. Tocá Silenciar alarma para avisarle que salís.',orderId:data.order.id});}
         setDriverLocation(data.driverLiveLocation || null);
         setWhatsappUrl(data.whatsappUrl || null);
         setLoading(false);

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import AiConciergeChat from '@/components/AiConciergeChat';
 import PwaOneTapInstaller from '@/components/PwaOneTapInstaller';
+import LiveLaunchStatus from '@/components/LiveLaunchStatus';
 import { validateDeliveryCoverage } from '@/lib/geo';
 import { CustomerProfile, MenuItem } from '@/types';
 
@@ -222,6 +223,7 @@ export default function HomePage() {
 
       <section className="max-w-6xl mx-auto px-4 pt-6 pb-4">
         <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-orange-950/40 border border-slate-800 p-6 md:p-10 shadow-2xl">
+          <LiveLaunchStatus />
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-300 text-xs font-bold mb-4">
             <Flame className="w-4 h-4 text-orange-400" />
             PORCIONES GRANDES Y CONTUNDENTES · SIN ESCATIMAR

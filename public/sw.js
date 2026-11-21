@@ -1,83 +1,10 @@
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
+self.addEventListener('install',()=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+self.addEventListener('push',e=>{
+let d={title:'Sabor Goo Alerta',body:'Nueva alerta urgente',url:'/',tag:'sabor-goo-alerta',playAlertSound:true};
+if(e.data){try{d={...d,...e.data.json()};}catch{d.body=e.data.text();}}
+const p1=self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{cs.forEach(c=>c.postMessage({type:'SABOR_GOO_PUSH_SOUND',payload:d}));});
+const p2=self.registration.showNotification(d.title,{body:d.body,icon:'/favicon.ico',badge:'/favicon.ico',tag:d.tag||'sabor-goo-alerta',renotify:true,requireInteraction:true,vibrate:[800,200,800,200,800,200,1200],data:{url:d.url||'/'}});
+e.waitUntil(Promise.all([p1,p2]));
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
-
-self.addEventListener('push', (event) => {
-  let data = {
-    title: 'Sabor Goo Maldonado',
-    body: 'Tienes una actualización de tu pedido.',
-    url: '/',
-    badgeCount: 1,
-    tag: 'sabor-goo-alert',
-    playAlertSound: true,
-  };
-
-  if (event.data) {
-    try {
-      const parsed = event.data.json();
-      data = { ...data, ...parsed };
-    } catch {
-      data.body = event.data.text();
-    }
-  }
-
-  const badgePromise =
-    typeof navigator !== 'undefined' && 'setAppBadge' in navigator
-      ? navigator.setAppBadge(data.badgeCount || 1).catch(() => {})
-      : Promise.resolve();
-
-  const notifyClientsPromise = self.clients
-    .matchAll({ type: 'window', includeUncontrolled: true })
-    .then((clientList) => {
-      for (const client of clientList) {
-        client.postMessage({
-          type: 'SABOR_GOO_PUSH_SOUND',
-          payload: data,
-        });
-      }
-    });
-
-  const showNotificationPromise = self.registration.showNotification(data.title, {
-    body: data.body,
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
-    tag: data.tag || 'sabor-goo-notif',
-    renotify: true,
-    vibrate:,
-    data: { url: data.url || '/' },
-  });
-
-  event.waitUntil(
-    Promise.all([badgePromise, notifyClientsPromise, showNotificationPromise])
-  );
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  if (typeof navigator !== 'undefined' && 'clearAppBadge' in navigator) {
-    navigator.clearAppBadge().catch(() => {});
-  }
-
-  const targetUrl = event.notification.data?.url || '/';
-
-  event.waitUntil(
-    self.clients
-      .matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        for (const client of windowClients) {
-          if ('focus' in client) {
-            client.navigate(targetUrl);
-            return client.focus();
-          }
-        }
-        if (self.clients.openWindow) {
-          return self.clients.openWindow(targetUrl);
-        }
-      })
-  );
-});
+self.addEventListener('notificationclick',e=>{e.notification.close();const u=e.notification.data&&e.notification.data.url||'/';e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{for(const c of cs){if('focus'in c){c.navigate(u);return c.focus();}}if(self.clients.openWindow)return self.clients.openWindow(u);}));});
