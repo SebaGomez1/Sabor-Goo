@@ -2,9 +2,9 @@
 import React,{useEffect,useState}from 'react';
 import{Clock,Sparkles}from 'lucide-react';
 const LAUNCH_MS=new Date('2026-11-21T11:00:00-03:00').getTime();
-function getUyStatus(now){
+function getUyStatus(now: Date){
 const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Montevideo',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(now);
-const m={};p.forEach(x=>{if(x.type!=='literal')m[x.type]=x.value});
+const m: Record<string,string>={};p.forEach(x=>{if(x.type!=='literal')m[x.type]=x.value});
 const d=m.weekday,h=Number(m.hour==='24'?0:m.hour),min=Number(m.minute),t=h*60+min;
 let open=false,next='';
 if(d==='Wed'){open=t<120;next='Jueves 17:00 hs';}
