@@ -210,7 +210,7 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             {totalDishesCount > 0 && (
-              <a href="#checkout" className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/25 transition">
+              <a href="/checkout" className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/25 transition">
                 <ShoppingBag className="w-4 h-4" />
                 <span>{totalDishesCount} · ${estimatedTotalUyu} UYU</span>
               </a>
@@ -305,80 +305,7 @@ export default function HomePage() {
       </section>
 
       <section id="checkout" className="max-w-6xl mx-auto px-4 py-6">
-        <form onSubmit={handleSubmitOrder} className="rounded-3xl bg-slate-900 border border-slate-800 p-6 md:p-8 grid lg:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2"><ShoppingBag className="w-5 h-5 text-orange-400" /><h3 className="text-xl font-black text-white">Tu Carrito Inteligente</h3></div>
-              {smartCart.length > 0 && <button type="button" onClick={() => setSmartCart([])} className="text-xs text-slate-400 hover:text-red-400 flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> Vaciar</button>}
-            </div>
-            {smartCart.length === 0 ? (
-              <div className="p-5 rounded-2xl bg-slate-950 border border-dashed border-slate-700 text-center space-y-2">
-                <p className="text-sm font-bold text-slate-300">Tu carrito está vacío</p>
-                <p className="text-xs text-slate-400">Tocá cualquier plato del menú arriba para elegir carne o pollo, aderezos y sumarlo aquí.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {smartCart.map((line) => (
-                  <div key={line.cartKey} className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <p className="text-sm font-black text-white">{line.menu.title} <span className="text-orange-400">({line.protein})</span></p>
-                      {line.condiments.length > 0 && <p className="text-[11px] text-slate-400">Aderezos: {line.condiments.join(', ')}</p>}
-                      {line.extras.length > 0 && <p className="text-[11px] text-amber-400 font-bold">Extras: {line.extras.join(', ')}</p>}
-                      <p className="text-xs font-black text-emerald-400">${line.unitTotalUyu * line.qty} UYU <span className="text-slate-500 font-normal">(${line.unitTotalUyu} c/u)</span></p>
-                    </div>
-                    <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl p-1 shrink-0">
-                      <button type="button" onClick={() => updateCartLineQty(line.cartKey, -1)} className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-white"><Minus className="w-3.5 h-3.5" /></button>
-                      <span className="text-xs font-black text-white px-1.5">{line.qty}</span>
-                      <button type="button" onClick={() => updateCartLineQty(line.cartKey, 1)} className="w-7 h-7 rounded-lg bg-orange-500 hover:bg-orange-400 flex items-center justify-center text-white"><Plus className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="grid sm:grid-cols-2 gap-3 pt-2">
-              <div><label className="block text-xs font-bold text-slate-300 mb-1">Tu Nombre</label><input type="text" required value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Ej. Martín Rodríguez" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white" /></div>
-              <div><label className="block text-xs font-bold text-slate-300 mb-1">Tu Celular (WhatsApp)</label><input type="tel" required value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Ej. 099123456" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white" /></div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div><label className="block text-xs font-bold text-slate-300 mb-1">Nota extra para cocina (Opcional)</label><input type="text" value={requestedTimeSlot} onChange={(e) => setRequestedTimeSlot(e.target.value)} placeholder="Ej. Papas bien crocantes" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white" /></div>
-              <div><label className="block text-xs font-bold text-slate-300 mb-1">Código de Referido (Opcional)</label><input type="text" value={referralCodeUsed} onChange={(e) => setReferralCodeUsed(e.target.value.toUpperCase())} placeholder="Ej. SG-A1B2C3" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white uppercase" /></div>
-            </div>
-            <div><label className="block text-xs font-bold text-slate-300 mb-1">Dirección exacta / Edificio / Apto / Timbre</label><input type="text" required value={addressReference} onChange={(e) => setAddressReference(e.target.value)} placeholder="Ej. Av. Roosevelt Parada 12, Edificio Torre Sur" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white" /></div>
-            <div className="space-y-2.5 pt-2">
-              <label className="block text-xs font-bold text-slate-300">Método de Pago</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setPaymentMethod('efectivo')} className={`py-3 rounded-xl text-xs font-black border transition ${paymentMethod === 'efectivo' ? 'bg-orange-500/20 border-orange-500 text-orange-300' : 'bg-slate-950 border-slate-800 text-slate-400'}`}>Efectivo al recibir</button>
-                <button type="button" onClick={() => setPaymentMethod('mercadopago')} className={`py-3 rounded-xl text-xs font-black border transition ${paymentMethod === 'mercadopago' ? 'bg-sky-500/20 border-sky-500 text-sky-300' : 'bg-slate-950 border-slate-800 text-slate-400'}`}>Tarjeta (Mercado Pago)</button>
-              </div>
-              {paymentMethod === 'efectivo' && (
-                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
-                  <label className="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"><input type="checkbox" checked={cashNeedsChange} onChange={(e) => setCashNeedsChange(e.target.checked)} /> ¿Necesitas cambio?</label>
-                  {cashNeedsChange && (<div className="space-y-1.5"><input type="number" min={estimatedTotalUyu} value={cashPaidWithUyu} onChange={(e) => setCashPaidWithUyu(e.target.value)} placeholder="¿Con cuánto pagas? Ej. 1000" className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-white" /><p className="text-xs text-emerald-400 font-bold">Cambio exacto: ${cashChangePreview} UYU</p></div>)}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-4 flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-orange-400" />Punto GPS</span><button type="button" onClick={handleUseCurrentGps} className="text-[11px] font-bold bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 px-2.5 py-1 rounded-lg transition">Usar mi GPS actual</button></div>
-                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${geoValidation.allowed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`}>{geoValidation.allowed ? geoValidation.zoneName + ' · ' + geoValidation.distanceFromStoreKm + ' km' : 'Fuera de cobertura'}</span>
-              </div>
-              <div className="h-64 rounded-2xl overflow-hidden border border-slate-800"><InteractiveDeliveryMap selectedLat={pinLat} selectedLng={pinLng} centerLat={storeLocation.lat} centerLng={storeLocation.lng} onSelectLocation={(newLat: number, newLng: number) => { setPinLat(newLat); setPinLng(newLng); }} /></div>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-400"><span>Subtotal ({totalDishesCount} platos):</span><span className="font-bold text-white">${subtotalUyu} UYU</span></div>
-              {estimatedDiscountUyu > 0 && <div className="flex justify-between text-emerald-400 font-bold"><span>Descuento aplicado:</span><span>-${estimatedDiscountUyu} UYU</span></div>}
-              <div className="flex justify-between text-base font-black text-white pt-2 border-t border-slate-800"><span>Total a pagar:</span><span className="text-orange-400">${estimatedTotalUyu} UYU</span></div>
-            </div>
-            {errorMsg && <div className="p-3 rounded-xl bg-red-950/70 border border-red-500/40 text-xs text-red-200 flex items-center gap-2"><AlertTriangle className="w-4 h-4 shrink-0 text-red-400" /><span>{errorMsg}</span></div>}
-            {activeOrderId && <Link href={`/tracking/${activeOrderId}`} className="w-full py-3 rounded-2xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2"><Navigation className="w-4 h-4" />Ver seguimiento en vivo<ExternalLink className="w-3.5 h-3.5" /></Link>}
-            <button type="submit" disabled={submitting || smartCart.length === 0 || !geoValidation.allowed} className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 disabled:opacity-40 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/20 transition">
-              {submitting ? 'Confirmando pedido...' : 'Confirmar Pedido ($' + estimatedTotalUyu + ' UYU) y Enviar a WhatsApp'}
-            </button>
-          </div>
-        </form>
+        <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6 text-center space-y-3"><a href="/checkout" className="inline-flex items-center justify-center w-full py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-base transition">Continuar a Ubicación GPS y Checkout →</a></div>
       </section>
 
       {selectedProduct && (
