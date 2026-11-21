@@ -254,7 +254,7 @@ export default function HomePage() {
         body: JSON.stringify({
           customerName,
           customerPhone,
-          deliveryDate: bookingWindow?.targetDeliveryDate,
+          deliveryDate: new Date().toISOString().slice(0, 10),
           requestedTimeSlot,
           addressReference,
           lat: pinLat,
@@ -283,12 +283,7 @@ export default function HomePage() {
         return;
       }
 
-      if (data.whatsappUrl) {
-        window.open(data.whatsappUrl, '_blank', 'noopener,noreferrer');
-      }
-      if (data.trackingUrl) {
-        window.location.href = data.trackingUrl;
-      }
+      if (data.whatsappUrl) { window.location.href = data.whatsappUrl; return; } if (data.trackingUrl) { window.location.href = data.trackingUrl; }
     } catch {
       setErrorMsg('Error de conexión al enviar tu pedido. Intenta nuevamente.');
       setSubmitting(false);
@@ -335,13 +330,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-slate-900 border border-orange-500/40 px-3.5 py-1.5 rounded-2xl">
-            <Clock className="w-4 h-4 text-orange-400 animate-pulse" />
-            <div className="text-xs">
-              <span className="text-slate-400 block leading-none">Cierre reservas (21:00 hs):</span>
-              <span className="font-mono font-black text-orange-400 text-sm">{countdownText}</span>
-            </div>
-          </div>
+          
 
           <div className="flex items-center gap-2">
             <PwaOneTapInstaller customerPhone={customerPhone} />
@@ -370,17 +359,7 @@ export default function HomePage() {
             Chivitos al pan, al plato, napolitanas y hamburguesas recién hechos en Maldonado y Playa Mansa (Paradas 1 a 25). Pedilo ahora y seguí al repartidor en vivo hasta tu puerta.
           </p>
 
-          {bookingWindow && (
-            <div className="mt-5 p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 text-xs md:text-sm text-amber-200 flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>
-                {bookingWindow.bannerMessage} · Entrega programada para:{' '}
-                <strong className="text-white">
-                  {bookingWindow.targetDayLabel} ({bookingWindow.targetDeliveryDate})
-                </strong>
-              </span>
-            </div>
-          )}
+          
 
           {customerProfile && (
             <div className="mt-6 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-4">
@@ -639,18 +618,7 @@ export default function HomePage() {
 
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Franja Horaria Deseada</label>
-                <select
-                  value={requestedTimeSlot}
-                  onChange={(e) => setRequestedTimeSlot(e.target.value)}
-                  className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white"
-                >
-                  {TIME_SLOTS.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Preferencias del Chivito / Guarnición</label><input type="text" value={requestedTimeSlot} onChange={(e) => setRequestedTimeSlot(e.target.value)} placeholder="Ej. Papas crocantes, sin cebolla, aderezo aparte" className="w-full rounded-xl bg-slate-950 border border-slate-800 px-3.5 py-2.5 text-sm text-white" />
               </div>
 
               <div>
@@ -667,7 +635,7 @@ export default function HomePage() {
 
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1">
-                Dirección exacta / Edificio / Obra / Timbre
+                Dirección exacta / Edificio / Apto / Timbre
               </label>
               <input
                 type="text"
@@ -740,16 +708,13 @@ export default function HomePage() {
           <div className="space-y-4 flex flex-col justify-between">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-orange-400" />
-                  Marca tu punto exacto en el mapa
-                </span>
+                <div className="flex items-center gap-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-orange-400" />Punto GPS</span><button type="button" onClick={() => { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition((pos) => { setPinLat(pos.coords.latitude); setPinLng(pos.coords.longitude); }, () => setErrorMsg("Activa el GPS del navegador o toca tu ubicación en el mapa.")); } }} className="text-[11px] font-bold bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 px-2.5 py-1 rounded-lg transition">Usar mi GPS actual</button></div>
                 <span
                   className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                     geoValidation.allowed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
                   }`}
                 >
-                  {geoValidation.allowed ? geoValidation.zoneName : 'Fuera de cobertura'}
+                  {geoValidation.allowed ? `${geoValidation.zoneName} · ${geoValidation.distanceFromStoreKm} km (~${Math.round(18 + geoValidation.distanceFromStoreKm * 3)} min)` : 'Fuera de cobertura (Maldonado/P. Mansa)'}
                 </span>
               </div>
 
@@ -808,7 +773,7 @@ export default function HomePage() {
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 disabled:opacity-40 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/20 transition"
             >
               {submitting
-                ? 'Procesando reserva...'
+                ? 'Confirmando pedido al instante...'
                 : paymentMethod === 'mercadopago'
                   ? 'Pagar con Mercado Pago y Confirmar'
                   : 'Confirmar Pedido y Enviar a WhatsApp'}

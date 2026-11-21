@@ -122,5 +122,5 @@ export function validateDeliveryCoverage(
 }
 
 export function buildGoogleMapsPinUrl(lat: number, lng: number): string {
-  return `https://google.com{lat.toFixed(6)},${lng.toFixed(6)}`;
+  return "https://google.com" + lat.toFixed(6) + "," + lng.toFixed(6);
 }

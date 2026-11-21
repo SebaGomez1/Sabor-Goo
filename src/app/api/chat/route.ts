@@ -1,108 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { resolveNextBookingWindow, getMontevideoNow } from '@/lib/logistics';
+import { getMontevideoNow } from '@/lib/logistics';
+
+const FALLBACK_MENU = [
+  '- Chivito al pan para 1 ($360 UYU): Churrasco tierno, jamón, muzzarella, panceta, huevo, lechuga, tomate, mayonesa casera y papas fritas.',
+  '- Chivito al plato para 1 ($420 UYU): Porción abundante al plato con churrasco, jamón, queso, panceta, huevo, guarnición completa y fritas.',
+  '- Hamburguesa especial de carne picada ($320 UYU): Carne 100% vacuna casera, cheddar/muzzarella, panceta crocante, huevo y papas.',
+  '- Napolitana para 1 ($390 UYU): Milanesa casera cubierta con salsa de tomate, jamón, muzzarella gratinada y guarnición abundante.',
+  '- Hamburguesa clásica con carne picada ($260 UYU): Carne casera jugosa, lechuga, tomate, mayonesa especial y papas fritas.'
+].join('\n');
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const userMessage = String(body?.message || '').trim();
-    const history = Array.isArray(body?.history) ? body.history.slice(-8) : [];
-
-    if (!userMessage) {
-      return NextResponse.json({ error: 'Escribe un mensaje.' }, { status: 400 });
-    }
+    const history = Array.isArray(body?.history) ? body.history.slice(-12) : [];
+    if (!userMessage) return NextResponse.json({ error: 'Escribe un mensaje.' }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
-    const [{ data: menus }, { data: settings }] = await Promise.all([
-      supabase
-        .from('menus')
-        .select('day_label, title, description, price_uyu, daily_stock')
-        .eq('is_active', true)
-        .order('day_of_week', { ascending: true }),
-      supabase.from('app_settings').select('*').eq('id', 1).single(),
-    ]);
-
-    const booking = resolveNextBookingWindow(settings?.cutoff_hour ?? 21);
+    const { data: menus } = await supabase.from('menus').select('title, description, price_uyu, daily_stock').eq('is_active', true);
     const uyNow = getMontevideoNow();
+    const menuSummary = (menus && menus.length > 0) ? menus.map((m) => `- ${m.title} ($${m.price_uyu} UYU): ${m.description}`).join('\n') : FALLBACK_MENU;
 
-    const menuSummary = (menus || [])
-      .map(
-        (m) =>
-          `- ${m.day_label}: ${m.title} ($${m.price_uyu} UYU, stock disponible: ${m.daily_stock}). ${m.description}`
-      )
-      .join('\n');
+    const systemPrompt = `Eres el asistente inteligente de "Sabor Goo", una chivetería con pedidos al instante en Maldonado y Playa Mansa (Punta del Este), Uruguay. Tu personalidad es cálida, cercana, uruguaya, ágil y natural. Puedes conversar con total fluidez, inteligencia y coherencia sobre CUALQUIER tema de la vida (charla cotidiana, cultura, deportes, consejos, preguntas generales o lo que el usuario quiera hablar) y, cuando venga al caso, recomendar de forma natural nuestro menú de chivetería al instante.\n\nHORA ACTUAL EN URUGUAY: ${String(uyNow.hour).padStart(2, '0')}:${String(uyNow.minute).padStart(2, '0')} hs.\n\nINFORMACIÓN REAL DEL NEGOCIO SABOR GOO:\n1. Modalidad: Todo nuestro menú se prepara EN EL MOMENTO (pedidos al instante, sin encargues del día anterior).\n2. Cobertura geográfica: Repartimos en TODO Maldonado (cada barrio) y en Playa Mansa de Punta del Este desde Parada 1 hasta Parada 25 y su eje hacia Maldonado.\n3. Pedido rápido y tracking GPS: Sin registro ni contraseña. El cliente elige sus chivitos/hamburguesas/napolitanas, marca su punto GPS en el mapa, confirma por WhatsApp o paga con Mercado Pago, y recibe seguimiento GPS en vivo del repartidor hasta su puerta.\n4. Beneficios y Referidos vigentes:\n   - Racha de 3 días seguidos comprando: desde el 4.° día obtiene 25% OFF vitalicio mientras siga pidiendo a diario (sábado y domingo no cortan racha; si falta 2 días seguidos pierde el descuento).\n   - 5 referidos nuevos comprando en el mismo día con su link único = 25% OFF inmediato ese mismo día.\n   - 10 referidos activos comprando a diario = 1 COMIDA GRATIS por día (si baja a 9 conserva automáticamente el 25% OFF).\n5. Privacidad del reparto: JAMÁS menciones "bici" ni "bicicleta". Habla siempre de "seguimiento en vivo del repartidor hasta tu puerta".\n\nMENÚ ACTUAL DE CHIVETERÍA (DISPONIBLE AL INSTANTE):\n${menuSummary}`;
 
-    const systemPrompt = `Eres el asistente oficial de "Sabor Goo" en Maldonado, Uruguay.
-Tu personalidad es cálida, cercana, uruguaya, rápida y persuasiva, pero también puedes charlar con fluidez sobre cualquier tema de la vida, deportes, clima, trabajo o actualidad para generar confianza y luego invitar sutilmente a asegurar su almuerzo abundante antes de las 21:00 hs.
-
-REGLAS ESTRICTAS DEL NEGOCIO SABOR GOO:
-1. Sello de Abundancia: Todos nuestros platos son 100% caseros, muy bien servidos, abundantes y contundentes, sin escatimar.
-2. Cobertura geográfica exclusiva: Repartimos en TODO Maldonado (cada barrio) y en Playa Mansa de Punta del Este EXCLUSIVAMENTE desde Parada 1 hasta Parada 25 y su eje hacia Maldonado. Fuera de esa zona no tomamos pedidos.
-3. Horarios y cierre: Atendemos de Lunes a Viernes al mediodía. El cierre de reservas es a las 21:00 hs (hora Uruguay, ahora son las ${String(uyNow.hour).padStart(2, '0')}:${String(uyNow.minute).padStart(2, '0')} hs). Próxima entrega disponible: ${booking.targetDayLabel}. Fines de semana cerrado, pero se puede reservar anticipado para el Lunes.
-4. Sin registro con contraseña: El cliente solo completa su pedido con nombre, celular, ubicación en el mapa y confirma por WhatsApp (o paga con Mercado Pago).
-5. Beneficios y Gamificación:
-   - Racha de 3 días hábiles seguidos comprando = desde el 4.º día obtiene 25% OFF vitalicio mientras siga comprando a diario (sábado y domingo no cortan racha; si falta 2 días hábiles seguidos pierde el descuento).
-   - 5 referidos nuevos comprando en el mismo día con su link único = 25% OFF inmediato ese mismo día.
-   - 10 referidos activos comprando a diario = 1 COMIDA GRATIS por día. Si baja a 9 conserva automáticamente el 25% OFF.
-6. REGLA CRÍTICA DE PRIVACIDAD: JAMÁS menciones "bici" ni "bicicleta". Siempre habla de "seguimiento en vivo del repartidor hasta tu puerta".
-
-CATÁLOGO ACTUAL DE SABOR GOO:
-${menuSummary}`;
-
-    const openaiKey = process.env.OPENAI_API_KEY;
-    if (openaiKey) {
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        ...history.map((h: { role: string; content: string }) => ({
-          role: h.role === 'assistant' ? 'assistant' : 'user',
-          content: String(h.content || ''),
-        })),
-        { role: 'user', content: userMessage },
-      ];
-
-      const aiRes = await fetch('https://openai.com', {
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+    if (geminiKey) {
+      const contents = [...history.map((h: { role: string; content: string }) => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(h.content || '') }] })), { role: 'user', parts: [{ text: userMessage }] }];
+      const gemRes = await fetch('https://' + '://googleapis.com' + geminiKey, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${openaiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages,
-          temperature: 0.7,
-          max_tokens: 450,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt }] }, contents, generationConfig: { temperature: 0.75, maxOutputTokens: 600 } })
       });
-
-      if (aiRes.ok) {
-        const data = await aiRes.json();
-        const reply = data?.choices?.at(0)?.message?.content;
-        if (reply) {
-          return NextResponse.json({ reply });
-        }
+      if (gemRes.ok) {
+        const data = await gemRes.json();
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) return NextResponse.json({ reply });
       }
     }
 
-    // Respuesta inteligente de respaldo con datos en tiempo real de Supabase
     const q = userMessage.toLowerCase();
     let reply = '';
-
-    if (q.includes('menu') || q.includes('menú') || q.includes('precio') || q.includes('comida') || q.includes('hoy')) {
-      reply = `¡Hola! En **Sabor Goo** cocinamos platos caseros, muy bien servidos y abundantes sin escatimar. Para **${booking.targetDayLabel}** tenemos opciones desde **$220 a $400 UYU**:\n\n${menuSummary}\n\nRecuerda reservar antes de las **21:00 hs** para asegurar tu bandeja.`;
-    } else if (q.includes('zona') || q.includes('punta') || q.includes('mansa') || q.includes('envio') || q.includes('reparto')) {
-      reply = `Llegamos a **todo Maldonado** (cada barrio) y a **Playa Mansa de Punta del Este desde Parada 1 hasta Parada 25** y todo su eje hacia Maldonado. Además tienes **seguimiento en vivo del repartidor** hasta que llega a tu puerta.`;
+    if (q.includes('menu') || q.includes('menú') || q.includes('precio') || q.includes('chivito') || q.includes('hamburguesa') || q.includes('comer')) {
+      reply = `¡Tenemos todo listo para preparar **en el momento**!\n\n${menuSummary}\n\nElige lo que más te tiente arriba en el catálogo, marca tu punto GPS y te lo mandamos al instante.`;
+    } else if (q.includes('zona') || q.includes('punta') || q.includes('mansa') || q.includes('envio') || q.includes('envío') || q.includes('reparto')) {
+      reply = 'Llegamos al instante a **todo Maldonado** y **Playa Mansa (Parada 1 a 25)**. Además cuentas con **seguimiento GPS en vivo del repartidor** hasta tu puerta.';
     } else if (q.includes('gratis') || q.includes('descuento') || q.includes('referido') || q.includes('racha')) {
-      reply = `¡Tenemos 3 beneficios brutales para trabajadores y equipos!\n• **3 días hábiles seguidos** comprando = **25% OFF** desde el 4.º día.\n• **5 referidos en el mismo día** con tu link = **25% OFF inmediato**.\n• **10 referidos activos diarios** = **1 comida GRATIS todos los días** (y si bajas a 9, conservas tu 25% OFF).`;
+      reply = 'Tenemos 3 beneficios activos:\n• **3 días seguidos** pidiendo = **25% OFF** desde el 4.° día.\n• **5 referidos** en el día con tu link = **25% OFF** inmediato.\n• **10 referidos activos** = **1 comida GRATIS por día**.';
     } else {
-      reply = `¡Qué bueno saludarte! Aquí en Maldonado seguimos a full preparando viandas caseras y abundantes de verdad (bandejas bien servidas que te dejan listo para seguir el día). Si quieres, dime en qué barrio o parada estás y te cuento qué sale para **${booking.targetDayLabel}** antes del cierre de las **21:00 hs**.`;
+      reply = '¡Hola! Soy el asistente de **Sabor Goo** en Maldonado. Pregúntame lo que quieras sobre nuestros chivitos, hamburguesas, napolitanas, zonas de envío o beneficios de referidos.';
     }
-
     return NextResponse.json({ reply });
   } catch (error) {
     console.error('POST /api/chat error:', error);
-    return NextResponse.json(
-      { error: 'No se pudo procesar tu consulta en este momento.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'No se pudo procesar tu consulta en este momento.' }, { status: 500 });
   }
 }

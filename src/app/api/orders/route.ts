@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin || 'https://vercel.app';
 
     if (isMercadoPagoRequired) {
-      const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+      const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN;
       if (!mpAccessToken) {
         return NextResponse.json(
           { error: 'Mercado Pago no está configurado en el servidor.' },
@@ -357,7 +357,7 @@ export async function POST(req: NextRequest) {
           items: [
             {
               id: createdOrder.id,
-              title: `Sabor Goo #${createdOrder.order_number} - Menú Abundante (${input.deliveryDate})`,
+              title: `Sabor Goo #${createdOrder.order_number} - Pedido Chivetería al Instante`,
               quantity: 1,
               unit_price: totalUyu,
               currency_id: 'UYU',
@@ -369,9 +369,9 @@ export async function POST(req: NextRequest) {
           external_reference: createdOrder.id,
           notification_url: `${appBaseUrl.replace(/\/$/, '')}/api/webhooks/mercadopago`,
           back_urls: {
-            success: `${appBaseUrl.replace(/\/$/, '')}/tracking/${createdOrder.id}?mp=approved`,
+            success: `${appBaseUrl.replace(/\/$/, '')}/seguimiento/${createdOrder.id}?mp=approved`,
             failure: `${appBaseUrl.replace(/\/$/, '')}/?mp=failure&order=${createdOrder.id}`,
-            pending: `${appBaseUrl.replace(/\/$/, '')}/tracking/${createdOrder.id}?mp=pending`,
+            pending: `${appBaseUrl.replace(/\/$/, '')}/seguimiento/${createdOrder.id}?mp=pending`,
           },
           auto_return: 'approved',
         },
@@ -463,7 +463,7 @@ export async function POST(req: NextRequest) {
       orderId: createdOrder.id,
       orderNumber: createdOrder.order_number,
       whatsappUrl,
-      trackingUrl: `/tracking/${createdOrder.id}`,
+      trackingUrl: `/seguimiento/${createdOrder.id}`,
       customerReferralCode: customer.referral_code,
     });
   } catch (error) {
