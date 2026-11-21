@@ -330,7 +330,7 @@ export async function POST(req: NextRequest) {
             failure: `${appBaseUrl.replace(/\/$/, '')}/?mp=failure&order=${createdOrder.id}`,
             pending: `${appBaseUrl.replace(/\/$/, '')}/seguimiento/${createdOrder.id}?mp=pending`,
           },
-          auto_return: 'approved',
+          ...(appBaseUrl.startsWith('https://') ? { auto_return: 'approved' } : {}),
         },
       });
 
@@ -426,7 +426,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('POST /api/orders error:', error);
     return NextResponse.json(
-      { error: 'Ocurrió un error procesando tu pedido.' },
+      { error: 'Error pedido: ${error instanceof Error ? error.message : JSON.stringify(error)}' },
       { status: 500 }
     );
   }
