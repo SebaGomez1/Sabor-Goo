@@ -108,7 +108,7 @@ export default function HomePage() {
       const query = phoneToQuery ? '?phone=' + encodeURIComponent(phoneToQuery) : '';
       const res = await fetch('/api/orders' + query);
       const data = await res.json();
-      if (Array.isArray(data.menus) && data.menus.length > 0) setMenus(data.menus);
+      if (Array.isArray(data.menus) && data.menus.length > 0) setMenus((prev) => [...LAUNCH_CATALOG, ...data.menus.filter((m) => !LAUNCH_CATALOG.some((l) => l.title.toLowerCase() === m.title.toLowerCase()))]);
       if (data.settings?.store_lat && data.settings?.store_lng) setStoreLocation({ lat: data.settings.store_lat, lng: data.settings.store_lng });
       if (data.customer) setCustomerProfile(data.customer);
       if (data.activeOrder?.id) setActiveOrderId(data.activeOrder.id);
