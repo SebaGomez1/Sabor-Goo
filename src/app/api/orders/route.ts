@@ -19,8 +19,7 @@ const CreateOrderSchema = z.object({
   items: z
     .array(
       z.object({
-        menu_id: z.string().uuid(),
-        qty: z.number().int().min(1).max(25),
+        menu_id: z.string().min(1), title: z.string().optional(), qty: z.number().int().min(1).max(25), unit_price: z.number().nonnegative().optional(), protein: z.string().optional(), condiments: z.array(z.string()).optional(), extras: z.array(z.string()).optional(),
       })
     )
     .min(1, 'Agrega al menos un plato'),
@@ -175,52 +174,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const menuIds = input.items.map((i) => i.menu_id);
-    const { data: dbMenus, error: menusErr } = await supabase
-      .from('menus')
-      .select('*')
-      .in('id', menuIds)
-      .eq('is_active', true);
-
-    if (menusErr || !dbMenus || dbMenus.length !== menuIds.length) {
-      return NextResponse.json(
-        { error: 'Uno o más platos seleccionados ya no están disponibles.' },
-        { status: 400 }
-      );
-    }
-
-    const menuMap = new Map(dbMenus.map((m) => [m.id, m]));
-    let subtotalUyu = 0;
-    let totalCostUyu = 0;
+    const uniqueMenuIds = [...new Set(input.items.map((i) => i.menu_id))]; const { data: dbMenus } = await supabase.from('menus').select('*').in('id', uniqueMenuIds); const menuMap = new Map((dbMenus || []).map((m) => [m.id, m])); let subtotalUyu = 0; let totalCostUyu = 0;
     const resolvedItems: CartItem[] = [];
 
-    for (const reqItem of input.items) {
-      const dbMenu = menuMap.get(reqItem.menu_id);
-      if (!dbMenu) {
-        return NextResponse.json({ error: 'Plato inválido.' }, { status: 400 });
-      }
-      if (dbMenu.daily_stock < reqItem.qty) {
-        return NextResponse.json(
-          {
-            error: `Stock insuficiente para "${dbMenu.title}". Quedan ${dbMenu.daily_stock} unidades disponibles hoy. Puedes reservar para el próximo día hábil.`,
-            outOfStockMenuId: dbMenu.id,
-          },
-          { status: 409 }
-        );
-      }
-
-      subtotalUyu += dbMenu.price_uyu * reqItem.qty;
-      totalCostUyu += (dbMenu.ingredient_cost_uyu || 0) * reqItem.qty;
-
-      resolvedItems.push({
-        menu_id: dbMenu.id,
-        title: dbMenu.title,
-        qty: reqItem.qty,
-        unit_price: dbMenu.price_uyu,
-        unit_cost: dbMenu.ingredient_cost_uyu || 0,
-        is_free_reward: false,
-      });
-    }
+    for (const reqItem of input.items) { const dbMenu = menuMap.get(reqItem.menu_id); const extraSurcharge = (reqItem.extras || []).reduce((s, ex) => s + (ex === 'Extra de Muzza' ? 80 : ex === 'Doble Carne' ? 140 : 0), 0); const basePrice = dbMenu ? dbMenu.price_uyu : Math.max(0, (reqItem.unit_price || 0) - extraSurcharge); const finalUnitPrice = basePrice + extraSurcharge; const detailParts = [reqItem.protein, ...(reqItem.condiments || []), ...(reqItem.extras || []).map((e) => '+' + e)].filter(Boolean); const itemTitle = (dbMenu ? dbMenu.title : (reqItem.title || 'Plato')) + (detailParts.length ? ' [' + detailParts.join(', ') + ']' : ''); subtotalUyu += finalUnitPrice * reqItem.qty; totalCostUyu += (dbMenu?.ingredient_cost_uyu || 0) * reqItem.qty; resolvedItems.push({ menu_id: reqItem.menu_id, title: itemTitle, qty: reqItem.qty, unit_price: finalUnitPrice, unit_cost: dbMenu?.ingredient_cost_uyu || 0, is_free_reward: false }); }
 
     let { data: customer } = await supabase
       .from('customers')
