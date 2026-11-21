@@ -43,7 +43,7 @@ interface SmartCartItem {
   cartKey: string;
   menu: MenuItem;
   qty: number;
-  protein: 'Carne' | 'Pollo' | '';
+  protein: string;
   condiments: string[];
   extras: string[];
   unitTotalUyu: number;
@@ -65,7 +65,7 @@ export default function HomePage() {
   const [storeLocation, setStoreLocation] = useState({ lat: -34.9089, lng: -54.9583 });
   const [smartCart, setSmartCart] = useState<SmartCartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
-  const [modalProtein, setCartOpen] = useState(false); const [_unusedMP, _setUnusedMP] = useState<'Carne' | 'Pollo'>('Carne');
+  const [cartOpen, setCartOpen] = useState(false); const [modalProtein, setModalProtein] = useState<string>('Carne');
   const [modalCondiments, setModalCondiments] = useState<string[]>(['Lechuga', 'Tomate', 'Mayonesa']);
   const [modalExtras, setModalExtras] = useState<string[]>([]);
   const [modalQty, setModalQty] = useState<number>(1);
