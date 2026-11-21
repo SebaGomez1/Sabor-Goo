@@ -363,13 +363,11 @@ export default function HomePage() {
           </div>
 
           <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight max-w-3xl">
-            Comida casera abundante y hamburguesas reales,{' '}
-            <span className="text-orange-400">reservadas hoy para mañana.</span>
+            Chivitos uruguayos reales y hamburguesas artesanales, <span className="text-amber-400">hechos al instante.</span>
           </h2>
 
           <p className="text-slate-300 mt-4 max-w-2xl text-sm md:text-base leading-relaxed">
-            Platos muy bien servidos pensados para trabajadores y familias de Maldonado y Playa Mansa (Paradas 1 a 25).
-            Seguimiento en vivo del repartidor hasta que llegue a tu puerta.
+            Chivitos al pan, al plato, napolitanas y hamburguesas recién hechos en Maldonado y Playa Mansa (Paradas 1 a 25). Pedilo ahora y seguí al repartidor en vivo hasta tu puerta.
           </p>
 
           {bookingWindow && (
