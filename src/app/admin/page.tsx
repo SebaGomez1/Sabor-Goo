@@ -659,7 +659,7 @@ export default function AdminPage() {
       <span className="text-11x font-bold uppercase tracking-wider text-slate-400 block">Foto del Producto</span>
       <label className="group relative flex flex-col items-center justify-center h-48 w-full rounded-xl border-2 border-dashed border-slate-700 hover:border-orange-500 bg-slate-950/60 overflow-hidden cursor-pointer transition">
         {menuForm.image_url && <img src={menuForm.image_url} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-40 transition" />}
-        <div className="relative z-10 flex flex-col items-center text-center p-4 bg-slate-950/70 rounded-xl backdrop-blur-sm">
+        <div className="pointer-events-none relative z-10 flex flex-col items-center text-center p-4 bg-slate-950/70 rounded-xl backdrop-blur-sm">
           <span className="text-xs font-bold text-white">{menuForm._uploading ? 'Subiendo imagen...' : 'Clic para subir foto'}</span>
           <span className="text-10x text-slate-400 mt-1">JPG, PNG o WEBP (Óptimo 16:9)</span>
         </div>
