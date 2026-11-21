@@ -71,7 +71,7 @@ export default function CheckoutPage() {
       localStorage.removeItem('sabor_goo_cart');
       if (paymentMethod === 'mercadopago' && data.initPoint) { window.location.href = data.initPoint; return; }
       if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
-      router.push('/tracking/' + data.order.id);
+      const oid=data.order?.id||data.orderId||data.id;if(oid)router.push('/tracking/'+oid);
     } catch (err: any) { setError(err.message || 'Error inesperado'); setSubmitting(false); }
   }
   return (
