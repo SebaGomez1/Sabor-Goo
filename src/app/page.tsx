@@ -43,7 +43,7 @@ interface SmartCartItem {
   cartKey: string;
   menu: MenuItem;
   qty: number;
-  protein: 'Carne' | 'Pollo';
+  protein: 'Carne' | 'Pollo' | '';
   condiments: string[];
   extras: string[];
   unitTotalUyu: number;
