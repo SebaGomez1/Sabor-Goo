@@ -1,3 +1,4 @@
+import PwaOneTapInstaller from '@/components/PwaOneTapInstaller';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import 'leaflet/dist/leaflet.css';
@@ -34,6 +35,7 @@ export default function RootLayout({
     <html lang="es-UY">
       <body className={`${inter.className} bg-slate-950 text-slate-100 antialiased`}>
         {children}
+        <PwaOneTapInstaller />
       </body>
     </html>
   );

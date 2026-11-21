@@ -24,7 +24,7 @@ import {
 import QRCode from 'qrcode';
 import { AdminAccountPublic, AppSettings, MenuItem, OrderRecord, VehicleType } from '@/types';
 import { RouteStopEstimate } from '@/lib/logistics';
-import { playSoftAlertChime } from '@/components/PwaOneTapInstaller';
+import { playSoftAlertChime, startPedidosYaAlarm, stopPedidosYaAlarm } from '@/components/PwaOneTapInstaller';
 import { MapMarkerPoint } from '@/components/InteractiveDeliveryMap';
 
 const InteractiveDeliveryMap = dynamic(
@@ -174,7 +174,7 @@ export default function AdminPage() {
           const data = await res.json();
           if (data.driverDelayAlert) {
             setDelayAlertBanner(true);
-            playSoftAlertChime();
+            startPedidosYaAlarm({title:'¡NUEVO PEDIDO CONFIRMADO!',body:'Toca para abrir o silenciar la alarma.'});
           }
           loadAllAdminData();
         }
