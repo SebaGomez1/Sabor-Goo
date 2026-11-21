@@ -183,7 +183,7 @@ export default function HomePage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerName, customerPhone, deliveryDate: new Date().toISOString().slice(0, 10),
-          requestedTimeSlot: (requestedTimeSlot + ' | ' + customNotes).slice(0, 180),
+          requestedTimeSlot: (requestedTimeSlot || 'Entrega inmediata').slice(0, 40),
           addressReference, lat: pinLat, lng: pinLng,
           items: smartCart.map((i) => ({ menu_id: i.menu.id, title: i.menu.title, qty: i.qty, unit_price: i.unitTotalUyu, protein: i.protein, condiments: i.condiments, extras: i.extras })),
           paymentMethod, cashNeedsChange, cashPaidWithUyu: Number(cashPaidWithUyu || 0), referralCodeUsed: referralCodeUsed || null, deviceToken,
