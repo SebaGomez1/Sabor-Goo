@@ -646,50 +646,64 @@ export default function AdminPage() {
 
         {activeTab === 'menus' && (
           <section className="space-y-6">
-            <form onSubmit={handleSaveMenu} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 grid sm:grid-cols-3 gap-3 text-xs">
-              <select
-                value={menuForm.day_of_week}
-                onChange={(e) => {
-                  const d = Number(e.target.value);
-                  const names: Record<number, string> = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes' };
-                  setMenuForm({ ...menuForm, day_of_week: d, day_label: names[d] || 'Lunes' });
-                }}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white"
-              >
-                <option value={1}>Lunes</option>
-                <option value={2}>Martes</option>
-                <option value={3}>Miércoles</option>
-                <option value={4}>Jueves</option>
-                <option value={5}>Viernes</option>
-              </select>
-              <input
-                type="text"
-                required
-                placeholder="Título del plato abundante"
-                value={menuForm.title}
-                onChange={(e) => setMenuForm({ ...menuForm, title: e.target.value })}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white"
-              />
-              <input
-                type="text"
-                required
-                placeholder="Descripción contundente"
-                value={menuForm.description}
-                onChange={(e) => setMenuForm({ ...menuForm, description: e.target.value })}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white"
-              />
-              <input
-                type="number"
-                required
-                placeholder="Precio venta UYU"
-                value={menuForm.price_uyu}
-                onChange={(e) => setMenuForm({ ...menuForm, price_uyu: Number(e.target.value) })}
-                className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white"
-              />
-                            <button type="submit" className="bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl py-2.5 flex items-center justify-center gap-1">
-                {menuForm.id ? "Guardar Cambios" : <><Plus className="w-4 h-4" /> Agregar Plato</>}
-              </button>
-            {menuForm.id && <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: "Lunes", title: "", description: "", category: "menu_diario", price_uyu: 300, ingredient_cost_uyu: 130, image_url: "https://unsplash.com", daily_stock: 30 })} className="bg-slate-700 text-white font-bold rounded-xl py-2.5">Cancelar</button>}</form>
+            <form onSubmit={handleSaveMenu} className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div>
+      <h3 className="text-base font-black text-white tracking-tight">{menuForm.id ? 'Editar Producto' : 'Nuevo Producto en Catálogo'}</h3>
+      <p className="text-11x text-slate-400">Configura imagen, precio, costo de producción y rentabilidad en tiempo real</p>
+    </div>
+    <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: 'Carta', title: '', description: '', category: 'menu_diario', price_uyu: 350, ingredient_cost_uyu: 140, image_url: '/menus/chivito-pan.jpg', daily_stock: 30 })} className="text-11x text-slate-400 hover:text-white underline">Limpiar campos</button>
+  </div>
+  <div className="grid lg:grid-cols-12 gap-6">
+    <div className="lg:col-span-4 space-y-3">
+      <span className="text-11x font-bold uppercase tracking-wider text-slate-400 block">Foto del Producto</span>
+      <label className="group relative flex flex-col items-center justify-center h-48 w-full rounded-xl border-2 border-dashed border-slate-700 hover:border-orange-500 bg-slate-950/60 overflow-hidden cursor-pointer transition">
+        {menuForm.image_url && <img src={menuForm.image_url} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-40 transition" />}
+        <div className="relative z-10 flex flex-col items-center text-center p-4 bg-slate-950/70 rounded-xl backdrop-blur-sm">
+          <span className="text-xs font-bold text-white">{menuForm._uploading ? 'Subiendo imagen...' : 'Clic para subir foto'}</span>
+          <span className="text-10x text-slate-400 mt-1">JPG, PNG o WEBP (Óptimo 16:9)</span>
+        </div>
+�zn�ܩ
+      </label>
+      <input type="text" placeholder="O pega URL de imagen directa..." value={menuForm.image_url || ''} onChange={(e) => setMenuForm({ ...menuForm, image_url: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-11x text-slate-300" />
+    </div>
+    <div className="lg:col-span-8 space-y-4">
+      <label className="space-y-1 block">
+        <span className="text-11x font-bold uppercase text-slate-400">Título del Producto *</span>
+        <input type="text" required placeholder="Ej. Chivito al pan completo" value={menuForm.title} onChange={(e) => setMenuForm({ ...menuForm, title: e.target.value, day_of_week: 1, day_label: 'Carta' })} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-orange-500 outline-none" />
+      </label>
+      <label className="space-y-1 block">
+        <span className="text-11x font-bold uppercase text-slate-400">Descripción e Ingredientes *</span>
+        <textarea rows={2} required placeholder="Detalla los ingredientes, porciones y guarnición..." value={menuForm.description} onChange={(e) => setMenuForm({ ...menuForm, description: e.target.value })} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-orange-500 outline-none" />
+      </label>
+      <div className="grid grid-cols-3 gap-3">
+        <label className="space-y-1">
+          <span className="text-11x font-bold uppercase text-slate-400">Precio Venta ($)</span>
+          <input type="number" required min={0} value={menuForm.price_uyu} onChange={(e) => setMenuForm({ ...menuForm, price_uyu: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white" />
+        </label>
+        <label className="space-y-1">
+          <span className="text-11x font-bold uppercase text-slate-400">Costo Producción ($)</span>
+          <input type="number" required min={0} value={menuForm.ingredient_cost_uyu} onChange={(e) => setMenuForm({ ...menuForm, ingredient_cost_uyu: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-amber-300" />
+        </label>
+        <label className="space-y-1">
+          <span className="text-11x font-bold uppercase text-slate-400">Stock Diario</span>
+          <input type="number" required min={0} value={menuForm.daily_stock || 30} onChange={(e) => setMenuForm({ ...menuForm, daily_stock: Number(e.target.value) })} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
+        </label>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+        <div className="flex items-center gap-5">
+          <div><span className="text-10x uppercase text-slate-500 block">Ganancia Neta / Unidad</span><span className="{Number(menuForm.price_uyu - (menuForm.ingredient_cost_uyu || 0)) > 0 ? 'text-emerald-400' : 'text-red-400'} text-lg font-black">$ {Number(menuForm.price_uyu - (menuForm.ingredient_cost_uyu || 0))} UYU</span></div>
+          <div className="h-8 w-px bg-slate-800" />
+          <div><span className="text-10x uppercase text-slate-500 block">Margen Neto</span><span className="text-lg font-black text-orange-400">{menuForm.price_uyu > 0 ? Math.round(((menuForm.price_uyu - (menuForm.ingredient_cost_uyu || 0)) / menuForm.price_uyu) * 100) : 0}%</span></div>
+        </div>
+        <div className="flex items-center gap-2">
+          {menuForm.id && <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: 'Carta', title: '', description: '', category: 'menu_diario', price_uyu: 350, ingredient_cost_uyu: 140, image_url: '/menus/chivito-pan.jpg', daily_stock: 30 })} className="bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl px-4 py-2.5 text-xs">Cancelar</button>}
+          <button type="submit" disabled={menuForm._uploading} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold rounded-xl px-6 py-2.5 text-xs flex items-center gap-1.5 shadow-lg shadow-orange-900/30">{menuForm.id ? 'Guardar Cambios' : <><Plus className="w-4 h-4" /> Publicar Producto</>}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
 
             <div className="grid md:grid-cols-2 gap-4">
               {menus.map((m) => (
