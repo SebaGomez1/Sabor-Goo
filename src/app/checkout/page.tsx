@@ -25,7 +25,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
-    try { const r = localStorage.getItem('sabor_goo_cart'); if (r) setItems(JSON.parse(r)); } catch {}
+    try{const r=localStorage.getItem('sabor_goo_cart');const p=r?JSON.parse(r):[];if(!p.length){router.replace('/');return;}setItems(p);}catch{router.replace('/');}
     requestGps();
   }, []);
 
@@ -56,7 +56,7 @@ export default function CheckoutPage() {
   const w1 = norm(detectedStreet).split(' ').filter((w) => w.length > 3)[0] || '';
   const w2 = norm(street).split(' ').filter((w) => w.length > 3)[0] || '';
   const streetMatchesGps = !detectedStreet || !street.trim() || norm(street).includes(w1) || norm(detectedStreet).includes(w2);
-  const totalUyu = items.reduce((a, b) => a + Number(b.unit_price || b.price_uyu || 0) * Number(b.qty || 1), 0);
+  const totalUyu = items.reduce((a, b) => a + Number(b.unitTotalUyu || b.unit_price || b.price_uyu || 0) * Number(b.qty || 1), 0);
 
   async function handleConfirm(e: React.FormEvent) {
     e.preventDefault();
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     if (!streetMatchesGps) { setError('BLOQUEO GPS: La calle no coincide con el pin (' + detectedStreet + ').'); return; }
     setSubmitting(true); setError('');
     try {
-      const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer_name: name.trim(), customer_phone: phone.trim(), delivery_date: new Date().toISOString().slice(0, 10), requested_time_slot: 'Inmediata', zone_name: detectedCity || 'Maldonado', address_reference: street.trim() + ' #' + doorNumber.trim(), lat, lng, notes: notes.trim(), payment_method: paymentMethod, cash_needs_change: needsChange, cash_paid_with_uyu: needsChange ? Number(paidWith || 0) : 0, items: items.map((it) => ({ menu_id: it.menu_id || it.id, title: it.title, qty: it.qty || 1, unit_price: it.unit_price || it.price_uyu })) }) });
+      const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer_name: name.trim(), customer_phone: phone.trim(), delivery_date: new Date().toISOString().slice(0, 10), requested_time_slot: 'Inmediata', zone_name: detectedCity || 'Maldonado', address_reference: street.trim() + ' #' + doorNumber.trim(), lat, lng, notes: notes.trim(), payment_method: paymentMethod, cash_needs_change: needsChange, cash_paid_with_uyu: needsChange ? Number(paidWith || 0) : 0, items: items.map((it) => ({ menu_id: it.menu_id || it.id, title: it.title, qty: it.qty || 1, unit_price: it.unitTotalUyu || it.unit_price || it.price_uyu, details: [it.protein, ...(it.condiments||[]), ...(it.extras||[])].filter(Boolean).join(", ") })) }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al crear pedido');
       localStorage.removeItem('sabor_goo_cart');
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-3">
             <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-3.5"><div><p className="text-xs font-black text-white">1. Fij: ha tu Punto GPS en el Mapa</p><p className="text-11x text-slate-400">{detectedStreet ? 'Calle GPS: ' + detectedStreet + ' (' + detectedCity + ')' : 'Activa el GPS y arrastra el pin a tu puerta'}</p></div><button type="button" onClick={requestGps} className="px-3.5 py-2 rounded-xl bg-orange-600 text-xs font-black text-white">{gpsLocked ? 'GPS Activo' : 'Activar GPS'}</button></div>
-            <InteractiveDeliveryMap centerLat={-34.9126} centerLng={-54.9583} selectedLat={lat} selectedLng={lng} onSelectLocation={(nlat, nlng) => { setLat(nlat); setLng_(nlng); setGpsLocked(true); }} heightClass="h-96 lg:h-[480px]" />
+            <InteractiveDeliveryMap centerLat={-34.9126} centerLng={-54.9583} selectedLat={lat} selectedLng={lng}  heightClass="h-96 lg:h-[480px]" />
           </div>
           <form onSubmit={handleConfirm} className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-base font-black text-white">2. Datos y Validación de Puerta</h3>

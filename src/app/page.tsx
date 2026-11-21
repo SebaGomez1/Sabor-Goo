@@ -65,7 +65,7 @@ export default function HomePage() {
   const [storeLocation, setStoreLocation] = useState({ lat: -34.9089, lng: -54.9583 });
   const [smartCart, setSmartCart] = useState<SmartCartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
-  const [modalProtein, setModalProtein] = useState<'Carne' | 'Pollo'>('Carne');
+  const [modalProtein, setCartOpen] = useState(false); const [_unusedMP, _setUnusedMP] = useState<'Carne' | 'Pollo'>('Carne');
   const [modalCondiments, setModalCondiments] = useState<string[]>(['Lechuga', 'Tomate', 'Mayonesa']);
   const [modalExtras, setModalExtras] = useState<string[]>([]);
   const [modalQty, setModalQty] = useState<number>(1);
@@ -141,7 +141,7 @@ export default function HomePage() {
 
   function openProductModal(item: MenuItem) {
     if (item.daily_stock <= 0) return;
-    setSelectedProduct(item); setModalProtein('Carne'); setModalCondiments(['Lechuga', 'Tomate', 'Mayonesa']); setModalExtras([]); setModalQty(1);
+    setSelectedProduct(item); setModalProtein(item.id==='napolitana-1'?'Carne':''); setModalCondiments(['Lechuga', 'Tomate', 'Mayonesa']); setModalExtras([]); setModalQty(1);
   }
   function toggleCondiment(name: string) { setModalCondiments((p) => p.includes(name) ? p.filter((c) => c !== name) : [...p, name]); }
   function togglePaidExtra(name: string) { setModalExtras((p) => p.includes(name) ? p.filter((e) => e !== name) : [...p, name]); }
@@ -210,10 +210,9 @@ export default function HomePage() {
           </div>
           <div className="flex items-center gap-2">
             {totalDishesCount > 0 && (
-              <a href="/checkout" className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/25 transition">
+              <button type="button" onClick={()=>setCartOpen(true)} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-xs shadow-lg shadow-orange-500/25 transition">
                 <ShoppingBag className="w-4 h-4" />
-                <span>{totalDishesCount} · ${estimatedTotalUyu} UYU</span>
-              </a>
+                <span>{totalDishesCount} · ${estimatedTotalUyu} UYU</span></button>
             )}
             <PwaOneTapInstaller customerPhone={customerPhone} />
             <Link href="/admin" className="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400">Admin</Link>
@@ -304,9 +303,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="checkout" className="max-w-6xl mx-auto px-4 py-6">
-        <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6 text-center space-y-3"><a href="/checkout" className="inline-flex items-center justify-center w-full py-4 px-6 rounded-2xl bg-orange-500 hover:bg-orange-400 text-slate-950 font-black text-base transition">Continuar a Ubicación GPS y Checkout →</a></div>
-      </section>
+      
 
       {selectedProduct && (
         <div onClick={() => setSelectedProduct(null)} className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
@@ -319,9 +316,9 @@ export default function HomePage() {
             <div className="p-6 space-y-5 max-h-[65vh] overflow-y-auto">
               <div><h3 className="text-2xl font-black text-white">{selectedProduct.title}</h3><p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">{selectedProduct.description}</p></div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between"><span className="text-xs font-black uppercase tracking-wider text-orange-400">1. Elegí el gusto principal</span><span className="text-[11px] font-bold text-emerald-400">Incluido (Gratis)</span></div>
+                <div className="flex items-center justify-between"><span className="text-xs font-black uppercase tracking-wider text-orange-400">{selectedProduct.id==='napolitana-1' && '1. Elegí el gusto principal'}</span><span className="text-[11px] font-bold text-emerald-400">Incluido (Gratis)</span></div>
                 <div className="grid grid-cols-2 gap-3">
-                  {(['Carne', 'Pollo'] as const).map((option) => (<button key={option} type="button" onClick={() => setModalProtein(option)} className={`py-3 px-4 rounded-2xl font-black text-sm border flex items-center justify-between transition ${modalProtein === option ? 'bg-orange-500/20 border-orange-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{option}</span>{modalProtein === option && <Check className="w-4 h-4 text-orange-400" />}</button>))}
+                  {(selectedProduct.id==='napolitana-1'?['Carne','Pollo']:[]).map((option) => (<button key={option} type="button" onClick={() => setModalProtein(option)} className={`py-3 px-4 rounded-2xl font-black text-sm border flex items-center justify-between transition ${modalProtein === option ? 'bg-orange-500/20 border-orange-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{option}</span>{modalProtein === option && <Check className="w-4 h-4 text-orange-400" />}</button>))}
                 </div>
               </div>
               <div className="space-y-2">
@@ -348,7 +345,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
-      <AiConciergeChat />
+      <AiConciergeChat />{totalDishesCount>0&&(<button type='button' onClick={()=>setCartOpen(true)} className='fixed bottom-5 right-5 z-40 flex items-center gap-3 px-5 py-3.5 rounded-full bg-orange-500 hover:bg-orange-400 text-slate-950 font-black shadow-2xl'><ShoppingBag className='w-5 h-5'/><span className='px-2 py-0.5 rounded-full bg-slate-950 text-orange-400 text-xs'>{totalDishesCount}</span><span>Ver Carrito · ${estimatedTotalUyu}</span></button>)}{cartOpen&&(<div className='fixed inset-0 z-50 bg-slate-950/90 p-4 flex items-center justify-center'><div className='w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-700 p-6 space-y-4 max-h-[85vh] overflow-y-auto'><div className='flex justify-between items-center'><h3 className='text-xl font-black text-white'>Tu Comanda ({totalDishesCount})</h3><button onClick={()=>setCartOpen(false)} className='text-slate-400'>✕</button></div>{smartCart.map(it=>(<div key={it.cartKey} className='p-3 rounded-2xl bg-slate-950 border border-slate-800 flex justify-between gap-2'><div><p className='font-bold text-white'>{it.qty}x {it.menu.title}</p><p className='text-xs text-slate-400'>{[it.protein,...(it.condiments||[]),...(it.extras||[])].filter(Boolean).join(' · ')||'Clásico'}</p><p className='text-xs font-black text-orange-400'>${it.unitTotalUyu*it.qty} UYU</p></div><div className='flex items-center gap-1'><button onClick={()=>updateCartLineQty(it.cartKey,-1)} className='px-2.5 py-1 rounded bg-slate-800 text-white'>-</button><button onClick={()=>updateCartLineQty(it.cartKey,1)} className='px-2.5 py-1 rounded bg-orange-500 text-slate-950 font-black'>+</button></div></div>))}<div className='border-t border-slate-800 pt-3 flex items-center justify-between font-black text-white'><span>Total Comanda:</span><span className='text-orange-400 text-lg'>${estimatedTotalUyu} UYU</span></div><button type='button' onClick={()=>{localStorage.setItem('sabor_goo_cart',JSON.stringify(smartCart.map(x=>({menu_id:x.menu.id,id:x.menu.id,title:x.menu.title,qty:x.qty,unit_price:x.unitTotalUyu,price_uyu:x.unitTotalUyu,protein:x.protein,condiments:x.condiments,extras:x.extras}))));window.location.href='/checkout';}} className='w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'>Continuar con el pedido →</button></div></div>)}
     </main>
   );
 }

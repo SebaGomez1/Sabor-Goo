@@ -55,7 +55,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [submittingLogin, setSubmittingLogin] = useState(false);
 
-    const [activeTab, setActiveTab] = useState<'pedidos' | 'ruta' | 'menus' | 'finanzas' | 'motores'>('pedidos');
+    const [manForm,setManForm]=useState({name:'',phone:'',address:'',menuId:'',qty:1,notes:'Pedido WhatsApp',payment:'efectivo'});const [savingMan,setSavingMan]=useState(false);const [activeTab, setActiveTab] = useState<'pedidos' | 'manual' | 'ruta' | 'menus' | 'finanzas' | 'motores'>('pedidos');
     const [showQrModal, setShowQrModal] = useState(false);
   const [copiedQrUrl, setCopiedQrUrl] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
@@ -506,7 +506,7 @@ export default function AdminPage() {
 
         <div className="max-w-6xl mx-auto px-4 pb-3 flex flex-wrap gap-2">
           {[
-            { id: 'pedidos', label: 'Pedidos en Vivo', icon: Truck },
+            { id: 'pedidos', label: 'Pedidos en Vivo', icon: Truck },{ id: 'manual', label: 'Pedido Manual (WA)', icon: Plus },
             { id: 'ruta', label: 'Repartidor & Radar', icon: Navigation },
             { id: 'menus', label: 'Menús, Costos y Stock', icon: UtensilsCrossed },
             { id: 'finanzas', label: 'Finanzas & Lista Negra', icon: DollarSign },
@@ -533,7 +533,7 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {activeTab === 'pedidos' && (
+        {activeTab === 'manual' && (<section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 max-w-xl"><h3 className="text-lg font-black text-white">Cargar Pedido Manual (WhatsApp / Mostrador)</h3><div className="grid grid-cols-2 gap-3"><input placeholder="Nombre cliente" value={manForm.name} onChange={e=>setManForm({...manForm,name:e.target.value})} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"/><input placeholder="Telefono WhatsApp" value={manForm.phone} onChange={e=>setManForm({...manForm,phone:e.target.value})} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"/></div><input placeholder="Direccion y Zona" value={manForm.address} onChange={e=>setManForm({...manForm,address:e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"/><div className="grid grid-cols-3 gap-3"><select value={manForm.menuId||(menus?.id||'')} onChange={e=>setManForm({...manForm,menuId:e.target.value})} className="col-span-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">{menus.map(it=><option key={it.id} value={it.id}>{it.title} (${it.price_uyu})</option>)}</select><input type="number" min={1} value={manForm.qty} onChange={e=>setManForm({...manForm,qty:Number(e.target.value)||1})} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"/></div><input placeholder="Gustos, proteina, extras y notas" value={manForm.notes} onChange={e=>setManForm({...manForm,notes:e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"/><button type="button" disabled={savingMan} onClick={async()=>{const it=menus.find(x=>x.id===(manForm.menuId||menus?.id));if(!it||!manForm.name.trim())return;setSavingMan(true);try{const res=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_name:manForm.name,customer_phone:manForm.phone||'099000000',delivery_date:new Date().toISOString().slice(0,10),requested_time_slot:'Inmediata',zone_name:'Maldonado',address_reference:manForm.address||'Retiro / WhatsApp',lat:-34.9126,lng:-54.9583,notes:manForm.notes,payment_method:manForm.payment,items:[{menu_id:it.id,id:it.id,title:it.title,qty:manForm.qty,unit_price:it.price_uyu}]})});if(res.ok){const d=await res.json();if(d.order)setOrders(prev=>[d.order,...prev]);setManForm({name:'',phone:'',address:'',menuId:'',qty:1,notes:'Pedido WhatsApp',payment:'efectivo'});setActiveTab('pedidos');}}finally{setSavingMan(false);}}} className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs">{savingMan?'Guardando...':'Cargar Pedido Manualmente'}</button></section>)}{activeTab === 'pedidos' && (
           <section className="grid md:grid-cols-2 gap-4">
             {orders.map((ord) => (
               <div key={ord.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
