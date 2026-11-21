@@ -61,7 +61,7 @@ const LAUNCH_CATALOG: MenuItem[] = [
 ];
 
 export default function HomePage() {
-  const [menus, setMenus] = useState<MenuItem[]>(LAUNCH_CATALOG);
+  const [menus, setMenus] = useState<MenuItem[]>([]);
   const [storeLocation, setStoreLocation] = useState({ lat: -34.9089, lng: -54.9583 });
   const [smartCart, setSmartCart] = useState<SmartCartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
@@ -108,7 +108,7 @@ export default function HomePage() {
       const query = phoneToQuery ? '?phone=' + encodeURIComponent(phoneToQuery) : '';
       const res = await fetch('/api/orders' + query);
       const data = await res.json();
-      if (Array.isArray(data.menus) && data.menus.length > 0) setMenus((prev) => [...LAUNCH_CATALOG, ...data.menus.filter((m: MenuItem) => !LAUNCH_CATALOG.some((l) => l.title.toLowerCase() === m.title.toLowerCase()))]);
+      if (Array.isArray(data.menus)) setMenus(data.menus);
       if (data.settings?.store_lat && data.settings?.store_lng) setStoreLocation({ lat: data.settings.store_lat, lng: data.settings.store_lng });
       if (data.customer) setCustomerProfile(data.customer);
       if (data.activeOrder?.id) setActiveOrderId(data.activeOrder.id);

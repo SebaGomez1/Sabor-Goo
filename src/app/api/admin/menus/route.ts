@@ -13,7 +13,7 @@ const MenuSchema = z.object({
   category: z.enum(['menu_diario', 'hamburguesa']),
   price_uyu: z.number().int().min(50).max(5000),
   ingredient_cost_uyu: z.number().int().min(0).max(5000),
-  image_url: z.string().url('URL de imagen inválida'),
+  image_url: z.string().min(1),
   daily_stock: z.number().int().min(0).max(500),
   is_active: z.boolean().optional().default(true),
 });
@@ -98,6 +98,6 @@ export async function DELETE(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
-  await supabase.from('menus').update({ is_active: false }).eq('id', id);
+  await supabase.from('menus').delete().eq('id', id);
   return NextResponse.json({ deleted: true });
 }

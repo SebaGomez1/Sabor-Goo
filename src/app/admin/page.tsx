@@ -87,7 +87,7 @@ export default function AdminPage() {
   const [gpsActive, setGpsActive] = useState(false);
   const [delayAlertBanner, setDelayAlertBanner] = useState(false);
 
-  const [menuForm, setMenuForm] = useState({
+  const [menuForm, setMenuForm] = useState<any>({
     day_of_week: 1,
     day_label: 'Lunes',
     title: '',
@@ -242,7 +242,7 @@ export default function AdminPage() {
       body: JSON.stringify(menuForm),
     });
     if (res.ok) {
-      setMenuForm({ ...menuForm, title: '', description: '' });
+      setMenuForm({ day_of_week: 1, day_label: 'Lunes', title: '', description: '', category: 'menu_diario', price_uyu: 300, ingredient_cost_uyu: 130, image_url: 'https://unsplash.com', daily_stock: 30 });
       loadAllAdminData();
     }
   }
@@ -367,8 +367,7 @@ export default function AdminPage() {
           >
             <Lock className="w-4 h-4" />
             {submittingLogin ? 'Ingresando...' : 'Ingresar al Panel'}
-          </button>
-        </form>
+          </button></form>
       </div>
     );
   }
@@ -688,16 +687,16 @@ export default function AdminPage() {
                 className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white"
               />
                             <button type="submit" className="bg-orange-600 hover:bg-orange-500 text-white font-black rounded-xl py-2.5 flex items-center justify-center gap-1">
-                <Plus className="w-4 h-4" /> Agregar Plato
+                {menuForm.id ? "Guardar Cambios" : <><Plus className="w-4 h-4" /> Agregar Plato</>}
               </button>
-            </form>
+            {menuForm.id && <button type="button" onClick={() => setMenuForm({ day_of_week: 1, day_label: "Lunes", title: "", description: "", category: "menu_diario", price_uyu: 300, ingredient_cost_uyu: 130, image_url: "https://unsplash.com", daily_stock: 30 })} className="bg-slate-700 text-white font-bold rounded-xl py-2.5">Cancelar</button>}</form>
 
             <div className="grid md:grid-cols-2 gap-4">
               {menus.map((m) => (
                 <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2 text-xs">
                   <div className="flex justify-between font-bold">
                     <span className="text-orange-400">{m.day_label} · {m.title}</span>
-                    <span className="text-emerald-400">Stock: {m.daily_stock}</span>
+                    <div className="flex items-center gap-2"><span className="text-emerald-400">Stock: {m.daily_stock}</span><button type="button" onClick={() => { setMenuForm(m); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white">Editar</button><button type="button" onClick={async () => { if (!confirm("¿Borrar " + m.title + "?")) return; await fetch("/api/admin/menus?id=" + m.id, { method: "DELETE" }); loadAllAdminData(); }} className="px-2 py-0.5 rounded bg-red-600 hover:bg-red-500 text-white">Borrar</button></div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 pt-2">
                     <label className="space-y-1">
