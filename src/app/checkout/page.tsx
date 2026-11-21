@@ -32,7 +32,7 @@ export default function CheckoutPage() {
   function requestGps() {
     if (!navigator.geolocation) { setError('GPS no disponible.'); return; }
     navigator.geolocation.getCurrentPosition(
-      (pos) => { setLat(Number(pos.coords.latitude.toFixed(6))); setLng__(Number(pos.coords.longitude.toFixed(6))); setGpsLocked(true); setError(''); },
+      (pos) => { setLat(Number(pos.coords.latitude.toFixed(6))); setLng_(Number(pos.coords.longitude.toFixed(6))); setGpsLocked(true); setError(''); },
       () => setError('Activa el GPS obligatorio para continuar.'),
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -81,7 +81,7 @@ export default function CheckoutPage() {
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-3">
             <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-3.5"><div><p className="text-xs font-black text-white">1. Fij: ha tu Punto GPS en el Mapa</p><p className="text-11x text-slate-400">{detectedStreet ? 'Calle GPS: ' + detectedStreet + ' (' + detectedCity + ')' : 'Activa el GPS y arrastra el pin a tu puerta'}</p></div><button type="button" onClick={requestGps} className="px-3.5 py-2 rounded-xl bg-orange-600 text-xs font-black text-white">{gpsLocked ? 'GPS Activo' : 'Activar GPS'}</button></div>
-            <InteractiveDeliveryMap centerLat={-34.9126} centerLng={-54.9583} selectedLat={lat} selectedLng={lng} onSelectLocation={(nlat, nlng) => { setLat(nlat); setLng__(nlng); setGpsLocked(true); }} heightClass="h-96 lg:h-[480px]" />
+            <InteractiveDeliveryMap centerLat={-34.9126} centerLng={-54.9583} selectedLat={lat} selectedLng={lng} onSelectLocation={(nlat, nlng) => { setLat(nlat); setLng_(nlng); setGpsLocked(true); }} heightClass="h-96 lg:h-[480px]" />
           </div>
           <form onSubmit={handleConfirm} className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
             <h3 className="text-base font-black text-white">2. Datos y Validación de Puerta</h3>
