@@ -69,7 +69,7 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al crear pedido');
       localStorage.removeItem('sabor_goo_cart');
-      if (paymentMethod === 'mercadopago' && data.initPoint) { window.location.href = data.initPoint; return; }
+      const mpUrl=data.checkoutUrl||data.initPoint||data.init_point||data.preferenceUrl;if(paymentMethod==='mercadopago'&&mpUrl){window.location.href=mpUrl;return;}
       if (data.whatsappUrl) window.open(data.whatsappUrl, '_blank');
       const oid=data.order?.id||data.orderId||data.id;if(oid)router.push('/tracking/'+oid);
     } catch (err: any) { setError(err.message || 'Error inesperado'); setSubmitting(false); }
