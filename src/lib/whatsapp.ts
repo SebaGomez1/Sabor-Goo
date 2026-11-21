@@ -77,5 +77,5 @@ export function buildWhatsAppOrderUrl(input: WhatsAppOrderMessageInput): string 
   ].filter(Boolean);
 
   const encodedMessage = encodeURIComponent(lines.join('\n'));
-  return `https://wa.me{cleanStorePhone}?text=${encodedMessage}`;
+  return `https://wa.me/${cleanStorePhone}?text=${encodedMessage}`;
 }
