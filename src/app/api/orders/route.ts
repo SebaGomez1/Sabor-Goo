@@ -297,7 +297,7 @@ export async function POST(req: NextRequest) {
     const appBaseUrl =
       process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin || 'https://vercel.app';
 
-    if (isMercadoPagoRequired) {
+    if (isMercadoPagoRequired) { await supabase.from('orders').update({ payment_status: 'pending', order_status: 'awaiting_payment' }).eq('id', createdOrder.id);
       const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MP_ACCESS_TOKEN;
       if (!mpAccessToken) {
         return NextResponse.json(
@@ -326,9 +326,9 @@ export async function POST(req: NextRequest) {
           external_reference: createdOrder.id,
           notification_url: `${appBaseUrl.replace(/\/$/, '')}/api/webhooks/mercadopago`,
           back_urls: {
-            success: `${appBaseUrl.replace(/\/$/, '')}/seguimiento/${createdOrder.id}?mp=approved`,
+            success: `${appBaseUrl.replace(/\/$/, '')}/tracking/${createdOrder.id}?mp=approved`,
             failure: `${appBaseUrl.replace(/\/$/, '')}/?mp=failure&order=${createdOrder.id}`,
-            pending: `${appBaseUrl.replace(/\/$/, '')}/seguimiento/${createdOrder.id}?mp=pending`,
+            pending: `${appBaseUrl.replace(/\/$/, '')}/tracking/${createdOrder.id}?mp=pending`,
           },
           ...(appBaseUrl.startsWith('https://') ? { auto_return: 'approved' } : {}),
         },
@@ -420,7 +420,7 @@ export async function POST(req: NextRequest) {
       orderId: createdOrder.id,
       orderNumber: createdOrder.order_number,
       whatsappUrl,
-      trackingUrl: `/seguimiento/${createdOrder.id}`,
+      trackingUrl: `/tracking/${createdOrder.id}`,
       customerReferralCode: customer.referral_code,
     });
   } catch (error) {
