@@ -54,13 +54,13 @@ export async function sendPushToCustomerPhone(phone: string, payload: PushNotifi
 export async function sendPushToAllClients(payload: PushNotificationPayload): Promise<number> {
   if (!ensureVapidConfigured()) return 0;
   const supabase = getSupabaseAdmin();
-  const { data: subs } = await supabase.from('0ush_subscriptions').select('*').is('admin_id', null);
+  const { data: subs } = await supabase.from('push_subscriptions').select('*').is('admin_id', null);
   return dispatchSubscriptions(subs || [], payload);
 }
 
 export async function sendPushToAllAdmins(payload: PushNotificationPayload): Promise<number> {
   if (!ensureVapidConfigured()) return 0;
   const supabase = getSupabaseAdmin();
-  const { data: subs } = await supabase.from('0ush_subscriptions').select('*').not('admin_id', 'is', null);
+  const { data: subs } = await supabase.from('push_subscriptions').select('*').not('admin_id', 'is', null);
   return dispatchSubscriptions(subs || [], payload);
 }
