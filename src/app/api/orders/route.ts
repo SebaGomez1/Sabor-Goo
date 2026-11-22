@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { validateDeliveryCoverage } from '@/lib/geo';
 import { resolveNextBookingWindow, computeOptimizedRouteSchedule } from '@/lib/logistics';
 import { buildWhatsAppOrderUrl, normalizeUruguayPhone } from '@/lib/whatsapp';
-import { sendPushToAllAdmins, sendPushToCustomerPhone } from '@/lib/push';
+import { sendPushToAllAdmins, sendPushToCustomerPhone, sendPushToCustomerPhone } from '@/lib/push';
 import { AppSettings, CartItem, OrderRecord } from '@/types';
 
 const CreateOrderSchema = z.object({
@@ -386,11 +386,11 @@ export async function POST(req: NextRequest) {
       title: `Nuevo Pedido #${createdOrder.order_number} ($${totalUyu} UYU)`,
       body: `${input.customerName} · ${geoCheck.zoneName} · ${input.requestedTimeSlot}`,
       url: '/admin',
-      playAlertSound: true,
+      playAlertSound: true, icon: (resolvedItems?.[0] && menuMap.get(resolvedItems[0].menu_id)?.image_url) || '/icon-192.png', image: (resolvedItems?.[0] && menuMap.get(resolvedItems[0].menu_id)?.image_url) || undefined,
       tag: `order-${createdOrder.id}`,
     });
 
-    const whatsappUrl = buildWhatsAppOrderUrl({
+    await sendPushToCustomerPhone(normalizedPhone,{title:'Pedido #'+createdOrder.order_number+' recibido!',body:'Tu pedido ya entro en Sabor Goo!',url:'/tracking/'+createdOrder.id,playAlertSound:false,icon:(resolvedItems?.[0] && menuMap.get(resolvedItems[0].menu_id)?.image_url) || '/icon-192.png',tag:'cust-'+createdOrder.id}); const whatsappUrl = buildWhatsAppOrderUrl({
       businessWhatsapp: settings.whatsapp_number,
       orderNumber: createdOrder.order_number,
       orderId: createdOrder.id,

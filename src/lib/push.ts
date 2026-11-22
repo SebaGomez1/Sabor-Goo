@@ -20,7 +20,7 @@ export interface PushNotificationPayload {
   url?: string;
   badgeCount?: number;
   tag?: string;
-  playAlertSound?: boolean;
+  playAlertSound?: boolean; icon?: string; image?: string;
 }
 
 async function dispatchSubscriptions(subs: any[], payload: PushNotificationPayload): Promise<number> {
