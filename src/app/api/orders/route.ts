@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { validateDeliveryCoverage } from '@/lib/geo';
 import { resolveNextBookingWindow, computeOptimizedRouteSchedule } from '@/lib/logistics';
 import { buildWhatsAppOrderUrl, normalizeUruguayPhone } from '@/lib/whatsapp';
-import { sendPushToAllAdmins, sendPushToCustomerPhone, sendPushToCustomerPhone } from '@/lib/push';
+import { sendPushToAllAdmins, sendPushToCustomerPhone } from '@/lib/push';
 import { AppSettings, CartItem, OrderRecord } from '@/types';
 
 const CreateOrderSchema = z.object({
