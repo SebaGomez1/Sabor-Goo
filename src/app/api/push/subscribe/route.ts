@@ -9,12 +9,12 @@ export async function POST(req: NextRequest) {
     const { subscription, customerPhone } = body;
 
     if (!subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
-      return NextResponse.json({ error: 'Suscripción push inválida.' }, { status: 400 });
+      return NextResponse.json({ error: 'Suscripcion push invalida.' }, { status: 400 });
     }
 
     const supabase = getSupabaseAdmin();
     const admin = getAdminFromRequest(req);
-    const normalizedPhone = customerPhone ? normalizeUruguayPhone(String(customerPhone)) : null;
+    const normalizedPhone = !admin && customerPhone ? normalizeUruguayPhone(String(customerPhone)) : null;
 
     await supabase.from('push_subscriptions').upsert(
       {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       { onConflict: 'endpoint' }
     );
 
-    return NextResponse.json({ subscribed: true });
+    return NextResponse.json({ subscribed: true, role: admin ? 'admin' : 'client' });
   } catch (error) {
     console.error('POST /api/push/subscribe error:', error);
     return NextResponse.json({ error: 'Error registrando notificaciones.' }, { status: 500 });

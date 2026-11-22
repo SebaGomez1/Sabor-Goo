@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Sabor Goo · Comida Casera Abundante en Maldonado y Playa Mansa',
   description:
     'Platos caseros muy bien servidos, abundantes y contundentes sin escatimar. Reparto en todo Maldonado y Playa Mansa (Paradas 1 a 25) con seguimiento en vivo del repartidor.',
-  manifest: '/manifest.json',
+  manifest: '/manifest.json', icons: { icon: '/favicon.png', apple: '/apple-touch-icon.png' },
   keywords: [
     'viandas Maldonado',
     'comida casera Maldonado',
