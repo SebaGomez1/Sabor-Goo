@@ -1,3 +1,4 @@
+import * as admin from "firebase-admin";
 import * as webpush from 'web-push';
 import { getSupabaseAdmin } from './supabase';
 
@@ -27,7 +28,7 @@ async function dispatchSubscriptions(subs: any[], payload: PushNotificationPaylo
   if (!subs || subs.length === 0) return 0;
   const supabase = getSupabaseAdmin();
   let sentCount = 0;
-  for (const sub of subs) {
+  if(!admin.apps.length&&process.env.FIREBASE_SERVICE_ACCOUNT){try{admin.initializeApp({credential:admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))});}catch{}}for (const sub of subs) {if(sub.endpoint?.startsWith("fcm://")){try{await admin.messaging().send({token:sub.endpoint.slice(6),android:{priority:"high"},data:{type:"NEW_ORDER",customer_name:String(payload.body?payload.body:"Cliente")}});sentCount++;}catch(e:any){if(e?.code==="messaging/registration-token-not-registered")await supabase.from("push_subscriptions").delete().eq("id",sub.id);}continue;}
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
