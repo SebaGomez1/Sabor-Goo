@@ -50,7 +50,7 @@ export default function CheckoutPage() {
         setDetectedCity(d?.address?.city || d?.address?.town || 'Maldonado');
       } catch {}
     })();
-    return () => { off = true; };
+    const [askNotif,setAskNotif]=useState(true);const grantClientNotif=()=>{try{(window as any).SaborGooAdmin?.requestClientNotif?.();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();}catch{}setAskNotif(false);};return () => { off = true; };
   }, [lat, lng]);
   const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^av\.|^blvr|^rgma|^calle/g, '').trim();
   const w1 = norm(detectedStreet).split(' ').filter((w) => w.length > 3)[0] || '';
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
             <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-3.5"><div><p className="text-xs font-black text-white">1. Fij: ha tu Punto GPS en el Mapa</p><p className="text-11x text-slate-400">{detectedStreet ? 'Calle GPS: ' + detectedStreet + ' (' + detectedCity + ')' : 'Activa el GPS y arrastra el pin a tu puerta'}</p></div><button type="button" onClick={requestGps} className="px-3.5 py-2 rounded-xl bg-orange-600 text-xs font-black text-white">{gpsLocked ? 'GPS Activo' : 'Activar GPS'}</button></div>
             <InteractiveDeliveryMap centerLat={-34.9126} centerLng={-54.9583} selectedLat={lat} selectedLng={lng}  heightClass="h-96 lg:h-[480px]" />
           </div>
-          <form onSubmit={handleConfirm} className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <form onSubmit={handleConfirm} className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">{askNotif&&(<div className="mb-4 rounded-xl border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-white flex items-center justify-between gap-3"><span>🔔 Activa las notificaciones para avisarte por la app el avance de tu pedido en tiempo real.</span><button type="button" onClick={grantClientNotif} className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-bold text-white">Activar notificaciones</button></div>)}
             <h3 className="text-base font-black text-white">2. Datos y Validación de Puerta</h3>
             <div className="grid grid-cols-2 gap-3"><input type="text" required placeholder="Tu Nombre *" value={name} onChange={(e) => setName(e.target.value)} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white" /><input type="tel" required placeholder="WhatsApp (099...) *" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white" /></div>
             <div className="grid grid-cols-3 gap-2"><input type="text" required placeholder="Calle exacta *" value={street} onChange={(e) => setStreet(e.target.value)} className="col-span-2 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white" /><input type="text" required placeholder="N° Puerta *" value={doorNumber} onChange={(e) => setDoorNumber(e.target.value)} className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white" /></div>

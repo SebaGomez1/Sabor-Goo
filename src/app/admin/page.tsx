@@ -42,7 +42,7 @@ interface FinancePeriod {
 }
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);useEffect(()=>{if(authenticated===true)(window as any).SaborGooAdmin?.enableAlarm?.();},[authenticated]);
   const [adminUser, setAdminUser] = useState<{
     id: string;
     email: string;
@@ -60,7 +60,7 @@ export default function AdminPage() {
   const [copiedQrUrl, setCopiedQrUrl] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
-  useEffect(() => {(window as any).SaborGooAdmin?.enableAlarm?.();
+  useEffect(() => {
     if (!showQrModal || typeof window === 'undefined') return;
     QRCode.toDataURL(window.location.origin, {
       width: 600,
