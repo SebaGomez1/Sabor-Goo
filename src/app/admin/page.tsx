@@ -60,7 +60,7 @@ export default function AdminPage() {
   const [copiedQrUrl, setCopiedQrUrl] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
-  useEffect(() => {
+  useEffect(() => {(window as any).SaborGooAdmin?.enableAlarm?.();
     if (!showQrModal || typeof window === 'undefined') return;
     QRCode.toDataURL(window.location.origin, {
       width: 600,
