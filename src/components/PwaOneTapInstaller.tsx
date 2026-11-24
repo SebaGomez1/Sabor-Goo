@@ -1,5 +1,5 @@
-import { PushNotifications } from "@capacitor/push-notifications";
 'use client';
+import { PushNotifications } from "@capacitor/push-notifications";
 import React,{useEffect,useState}from 'react';
 import{BellRing,VolumeX,Download,X}from 'lucide-react';
 let loopAudio:any=null,vibTimer:any=null;
