@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X, Sparkles } from 'lucide-react';
 
 interface ChatMessage {
@@ -20,7 +20,7 @@ export default function AiConciergeChat() {
     },
   ]);
 
-  async function handleSend(e: React.FormEvent) {
+   const endRef = useRef<HTMLDivElement>(null); useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading, open]); async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -80,10 +80,10 @@ export default function AiConciergeChat() {
           <div className="p-3 space-y-2.5 overflow-y-auto flex-1 bg-slate-950/90 text-sm">
             {messages.map((msg, idx) => (
               <div key={idx} className={`p-3 rounded-2xl whitespace-pre-line leading-relaxed ${msg.role === 'user' ? 'bg-orange-600 text-white ml-8' : 'bg-slate-800 text-slate-100 mr-6 border border-slate-700'}`}>
-                {msg.content}
+                {msg.content.split(/(\*\*[^*]+\*\*)/g).map((p, i) => p.startsWith('**') && p.endsWith('**') ? <strong key={i} className='text-amber-300 font-bold'>{p.slice(2, -2)}</strong> : p)}
               </div>
             ))}
-            {loading && <div className="text-xs text-slate-400 animate-pulse px-2">Escribiendo respuesta...</div>}
+            {loading && <div className="text-xs text-slate-400 animate-pulse px-2">Escribiendo respuesta...</div>}<div ref={endRef} />
           </div>
           <form onSubmit={handleSend} className="p-2.5 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
             <input type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Charla de lo que quieras o pide menú..." className="flex-1 bg-slate-800 text-white text-sm rounded-xl px-3 py-2 border border-slate-700 focus:outline-none focus:border-orange-500" />

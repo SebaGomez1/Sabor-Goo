@@ -27,12 +27,12 @@ export async function POST(req: NextRequest) {
     const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
     if (geminiKey) {
       const contents = [...history.map((h: { role: string; content: string }) => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(h.content || '') }] })), { role: 'user', parts: [{ text: userMessage }] }];
-      let gemRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=' + geminiKey, {
+      let gemRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-lite:generateContent?key=' + geminiKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: systemPrompt + '\n\nUsuario: ' + userMessage }] }], generationConfig: { temperature: 0.75, maxOutputTokens: 800 } })
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt }] }, contents, generationConfig: { temperature: 0.75, maxOutputTokens: 800 } })
       });
-      if (!gemRes.ok) { const e=await gemRes.text(); return NextResponse.json({ reply:'ERR:'+gemRes.status+' '+e.slice(0,180) }); } if (gemRes.ok) {
+      if (gemRes.ok) {
         const data = await gemRes.json();
         const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (reply) return NextResponse.json({ reply });
