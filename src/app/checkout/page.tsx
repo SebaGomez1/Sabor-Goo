@@ -50,7 +50,7 @@ export default function CheckoutPage() {
         setDetectedCity(d?.address?.city || d?.address?.town || 'Maldonado');
       } catch {}
     })();
-    const [askNotif,setAskNotif]=useState(true);const grantClientNotif=()=>{try{(window as any).SaborGooAdmin?.requestClientNotif?.();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();}catch{}setAskNotif(false);};return () => { off = true; };
+    return () => { off = true; };
   }, [lat, lng]);
   const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^av\.|^blvr|^rgma|^calle/g, '').trim();
   const w1 = norm(detectedStreet).split(' ').filter((w) => w.length > 3)[0] || '';
@@ -74,7 +74,8 @@ export default function CheckoutPage() {
       const oid=data.order?.id||data.orderId||data.id;if(oid)router.push('/tracking/'+oid);
     } catch (err: any) { setError(err.message || 'Error inesperado'); setSubmitting(false); }
   }
-  return (
+  const [askNotif,setAskNotif]=useState(true);const grantClientNotif=()=>{try{(window as any).SaborGooAdmin?.requestClientNotif?.();if("Notification"in window&&Notification.permission==="default")Notification.requestPermission();}catch{}setAskNotif(false);};
+return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between"><Link href="/" className="text-xs font-bold text-slate-400 hover:text-white">&larr; Volver al Menú</Link><span className="text-11x font-black uppercase text-orange-400 bg-orange-950/60 border border-orange-500/40 px-3 py-1 rounded-full">Radar GPS Obligatorio</span></div>
