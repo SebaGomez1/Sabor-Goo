@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret } from '@/lib/auth';
 import { getMontevideoNow } from '@/lib/logistics';
@@ -85,17 +85,17 @@ async function handleEngine1(req: NextRequest) {
         : null);
 
         const socialCaption = matchedMenu
-      ? `🔥 ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) — ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}\n\n📲 Pedilo AL INSTANTE en nuestra web (link en bio) • 25% OFF pidiendo 3 días seguidos • ¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajás a 9, mantenés tu 25% OFF diario)!\n\n${hashtags.join(' ')}`
+      ? `ðŸ”¥ ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) â€” ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}\n\nðŸ“² Pedilo AL INSTANTE en nuestra web (link en bio) â€¢ 25% OFF pidiendo 3 dÃ­as seguidos â€¢ Â¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajÃ¡s a 9, mantenÃ©s tu 25% OFF diario)!\n\n${hashtags.join(' ')}`
       : `${reel.script_text}\n\n${hashtags.join(' ')}`;
 
-    // Si hay webhook/API de publicación social conectado, enviarlo con foto, precio y hashtags reales
+    // Si hay webhook/API de publicaciÃ³n social conectado, enviarlo con foto, precio y hashtags reales
     const socialWebhook = process.env.SOCIAL_PUBLISHER_WEBHOOK_URL;
     if (socialWebhook) {
       await fetch(socialWebhook, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          brand: 'Sabor Goo · Chivetería Maldonado',
+          brand: 'Sabor Goo Â· ChiveterÃ­a Maldonado',
           reelId: reel.id,
           script: reel.script_text,
           caption: socialCaption,
@@ -120,7 +120,7 @@ async function handleEngine1(req: NextRequest) {
 
   const mode = isEmergency ? 'emergency_13h' : isNightWarmup ? 'night_warmup' : 'normal';
   await supabase.from('engine_logs').insert({
-    engine_name: 'Motor 1 · Publicador Multi-Red',
+    engine_name: 'Motor 1 Â· Publicador Multi-Red',
     mode,
     action_summary: `Publicados ${reelsToPublish.length} Reel(s) HD verticales (${mode}). Pedidos hoy: ${todayOrdersCount ?? 0}/${settings.daily_order_goal}.`,
     metadata: { publishedIds: reelsToPublish.map((r) => r.id), jitterMs },
@@ -140,3 +140,4 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   return handleEngine1(req);
 }
+
