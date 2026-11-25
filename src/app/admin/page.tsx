@@ -42,7 +42,7 @@ interface FinancePeriod {
 }
 
 export default function AdminPage() {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);useEffect(()=>{if(authenticated===true)(window as any).SaborGooAdmin?.enableAlarm?.();},[authenticated]);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);const [showMute,setShowMute]=useState(false);useEffect(()=>{if(typeof window!=="undefined"&&window.location.search.includes("alarm=1"))setShowMute(true);},[]);useEffect(()=>{if(authenticated===true&&!window.location.search.includes("alarm=1"))(window as any).SaborGooAdmin?.enableAlarm?.();},[authenticated]);
   const [adminUser, setAdminUser] = useState<{
     id: string;
     email: string;
@@ -183,7 +183,7 @@ export default function AdminPage() {
       { enableHighAccuracy: true, maximumAge: 5000 }
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    return (<>{showMute&&authenticated&&(<div className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-red-600 px-4 py-3 text-white shadow-lg"><span className="font-bold text-sm">🔔 ¡NUEVO PEDIDO ENTRANTE!</span><button type="button" onClick={()=>{try{(window as any).SaborGooAdmin?.stopAlarm?.();}catch{}setShowMute(false);window.history.replaceState({},"","/admin");}} className="rounded-lg bg-white px-4 py-2 text-xs font-black text-red-600 uppercase">SILENCIAR ALARMA</button></div>)}) => navigator.geolocation.clearWatch(watchId);
   }, [authenticated, gpsActive]);
 
   async function handleLogin(e: React.FormEvent) {
@@ -874,7 +874,4 @@ export default function AdminPage() {
           </section>
         )}
       </main>
-    </div>
-  );
-}
-
+    </div></>);}
