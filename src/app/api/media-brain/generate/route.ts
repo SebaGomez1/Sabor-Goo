@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret, getAdminFromRequest } from '@/lib/auth';
 
@@ -84,11 +84,10 @@ Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y tenta
 5. Reparto en todo Maldonado y Playa Mansa Paradas 1 a 25 con seguimiento en vivo del repartidor.
 PROHIBIDO mencionar viandas, encargues del dÃ­a anterior, ni las palabras bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre parÃ©ntesis.`;
 
-      const res = await fetch($u + geminiKey, {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + geminiKey, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${openAiKey}`,
-          'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           
