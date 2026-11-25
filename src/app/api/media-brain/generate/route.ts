@@ -84,7 +84,7 @@ Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y tenta
 5. Reparto en todo Maldonado y Playa Mansa Paradas 1 a 25 con seguimiento en vivo del repartidor.
 PROHIBIDO mencionar viandas, encargues del dÃ­a anterior, ni las palabras bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre parÃ©ntesis.`;
 
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + geminiKey, {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=' + geminiKey, {
         method: 'POST',
         headers: {
                     'Content-Type': 'application/json',
