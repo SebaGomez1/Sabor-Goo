@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret, getAdminFromRequest } from '@/lib/auth';
 
@@ -58,54 +58,54 @@ export async function POST(req: NextRequest) {
     const productPrice = featuredMenu?.price_uyu || 450;
     const productDesc =
       featuredMenu?.description ||
-      'Carne tierna a la plancha, jamón, muzzarella fundida, panceta crocante, huevo, lechuga, tomate y papas fritas.';
+      'Carne tierna a la plancha, jamÃ³n, muzzarella fundida, panceta crocante, huevo, lechuga, tomate y papas fritas.';
 
     const audiences = [
       'Amantes de los buenos chivitos en Maldonado y Punta del Este',
       'Juntadas con amigos, parejas y familias con ganas de comer rico al instante',
-      'Vecinos y turistas en Maldonado y Playa Mansa buscando chivetería artesanal',
+      'Vecinos y turistas en Maldonado y Playa Mansa buscando chiveterÃ­a artesanal',
     ];
     const targetAudience =
       body.targetAudience || audiences[Math.floor(Math.random() * audiences.length)];
 
     let scriptText = '';
-    const openAiKey = process.env.OPENAI_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
 
-    if (openAiKey) {
-      const prompt = `Escribe un guion corto de 25 segundos para un Reel vertical (TikTok/Instagram) de la chivetería "Sabor Goo" en Maldonado, Uruguay.
-Público objetivo: ${targetAudience}.
-Producto destacado real del menú: "${productTitle}" a $${productPrice} UYU.
-Descripción real del producto: ${productDesc}.
+    if (geminiKey) {
+      const prompt = `Escribe un guion corto de 25 segundos para un Reel vertical (TikTok/Instagram) de la chiveterÃ­a "Sabor Goo" en Maldonado, Uruguay.
+PÃºblico objetivo: ${targetAudience}.
+Producto destacado real del menÃº: "${productTitle}" a $${productPrice} UYU.
+DescripciÃ³n real del producto: ${productDesc}.
 Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y tentador:
-1. Pedidos al instante: lo pedís ahora y te llega calentito directo a tu puerta, sin esperar al otro día.
+1. Pedidos al instante: lo pedÃ­s ahora y te llega calentito directo a tu puerta, sin esperar al otro dÃ­a.
 2. Menciona el nombre exacto "${productTitle}", su precio de $${productPrice} pesos y sus ingredientes reales.
-3. Si pedís 3 días seguidos tenés 25% OFF desde el cuarto día.
-4. 4. Mientras mantengas 10 referidos activos comprando con tu link (en el día o a diario), comés GRATIS (y si bajás a 9 activos, seguís disfrutando el 25% OFF por compra diaria).
+3. Si pedÃ­s 3 dÃ­as seguidos tenÃ©s 25% OFF desde el cuarto dÃ­a.
+4. 4. Mientras mantengas 10 referidos activos comprando con tu link (en el dÃ­a o a diario), comÃ©s GRATIS (y si bajÃ¡s a 9 activos, seguÃ­s disfrutando el 25% OFF por compra diaria).
 5. Reparto en todo Maldonado y Playa Mansa Paradas 1 a 25 con seguimiento en vivo del repartidor.
-PROHIBIDO mencionar viandas, encargues del día anterior, ni las palabras bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre paréntesis.`;
+PROHIBIDO mencionar viandas, encargues del dÃ­a anterior, ni las palabras bici o bicicleta. Devuelve SOLO el texto hablado, sin acotaciones entre parÃ©ntesis.`;
 
-      const res = await fetch('https://openai.com', {
+      const res = await fetch($u + geminiKey, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${openAiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.75,
-          max_tokens: 260,
+          
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.75, maxOutputTokens: 260 }
+          
         }),
       });
 
       if (res.ok) {
         const json = await res.json();
-        scriptText = json?.choices?.at(0)?.message?.content?.trim() || '';
+        scriptText = json?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
       }
     }
 
     if (!scriptText) {
-     scriptText = `¿Antojo de un verdadero chivito uruguayo en Maldonado? Pedilo ahora en Sabor Goo y te lo llevamos calentito al instante. Probá nuestro ${productTitle}: ${productDesc}, por solo $${productPrice} pesos. Además, si pedís 3 días seguidos tenés 25% de descuento desde el cuarto día, y mientras mantengas 10 referidos activos comprando con tu link en el día o a diario, ¡tu pedido te sale totalmente gratis! (Y si bajás a 9 activos, mantenés tu 25% OFF por compra diaria). Llegamos a todo Maldonado y Playa Mansa de Parada 1 a 25 con seguimiento en vivo del repartidor hasta tu puerta. ¡Entrá ya y pedí el tuyo ahora mismo!`;
+     scriptText = `Â¿Antojo de un verdadero chivito uruguayo en Maldonado? Pedilo ahora en Sabor Goo y te lo llevamos calentito al instante. ProbÃ¡ nuestro ${productTitle}: ${productDesc}, por solo $${productPrice} pesos. AdemÃ¡s, si pedÃ­s 3 dÃ­as seguidos tenÃ©s 25% de descuento desde el cuarto dÃ­a, y mientras mantengas 10 referidos activos comprando con tu link en el dÃ­a o a diario, Â¡tu pedido te sale totalmente gratis! (Y si bajÃ¡s a 9 activos, mantenÃ©s tu 25% OFF por compra diaria). Llegamos a todo Maldonado y Playa Mansa de Parada 1 a 25 con seguimiento en vivo del repartidor hasta tu puerta. Â¡EntrÃ¡ ya y pedÃ­ el tuyo ahora mismo!`;
     }
 
     const voiceoverSsml = buildHumanVoiceSsml(scriptText);
@@ -138,3 +138,9 @@ PROHIBIDO mencionar viandas, encargues del día anterior, ni las palabras bici o
     return NextResponse.json({ error: 'Error en Cerebro Multimedia.' }, { status: 500 });
   }
 }
+
+
+
+
+
+
