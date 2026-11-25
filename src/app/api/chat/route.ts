@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { getMontevideoNow } from '@/lib/logistics';
 
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt }] }, contents, tools: [{ googleSearch: {} }], generationConfig: { temperature: 0.75, maxOutputTokens: 800 } })
       });
-      if (gemRes.ok) {
+      if (!gemRes.ok) { const errTxt = await gemRes.text(); return NextResponse.json({ reply: 'DEBUG GEMINI (' + gemRes.status + '): ' + errTxt.slice(0,220) }); } if (gemRes.ok) {
         const data = await gemRes.json();
         const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (reply) return NextResponse.json({ reply });
