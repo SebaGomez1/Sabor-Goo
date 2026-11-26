@@ -103,7 +103,7 @@ async function handleEngine1(req: NextRequest) {
           productTitle: matchedMenu?.title || 'Chivito Completo',
           productPriceUyu: matchedMenu?.price_uyu || null,
           productDescription: matchedMenu?.description || null,
-          productImageUrl: matchedMenu?.image_url || null,
+          voiceUrl: `${new URL(req.url).origin}/api/media-brain/voice?reelId=${reel.id}`, productImageUrl: matchedMenu?.image_url || null,
           voiceoverSsml: reel.voiceover_ssml,
           subtitles: reel.subtitles_json,
           videoPrompt: reel.video_prompt,
