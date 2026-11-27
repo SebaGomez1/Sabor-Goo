@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import { getSupabaseAdmin } from '@/lib/supabase';
+
 export async function GET(req: NextRequest) {
   try {
     const sp = req.nextUrl.searchParams;
@@ -14,9 +15,13 @@ export async function GET(req: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: 'Falta texto' }, { status: 400 });
     }
-    const tts = new MsEdgeTTS(); await tts.setMetadata('es-UY-ValentinaNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-    
-    const { audioStream } = await tts.toStream(text.replace(/! /g,"!... ").replace(/, /g,", ... ").replace(/\. /g,". ... "),{rate:"+10%",pitch:"+3Hz"});
+    const voice = sp.get('voice') || 'es-UY-MateoNeural';
+    const spokenText = text
+      .replace(/Sabor\s*Goo/gi, 'Sabor Guu')
+      .replace(/\.\.\./g, ', ');
+    const tts = new MsEdgeTTS();
+    await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    const { audioStream } = await tts.toStream(spokenText, { rate: '-4%', pitch: '-6Hz' });
     const chunks: Buffer[] = [];
     for await (const c of audioStream) chunks.push(c);
     return new NextResponse(Buffer.concat(chunks), {
