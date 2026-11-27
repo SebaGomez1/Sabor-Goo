@@ -5,6 +5,7 @@ import { verifyCronSecret } from '@/lib/auth';
 import { getMontevideoNow } from '@/lib/logistics';
 
 async function handleEngine1(req: NextRequest) {
+  try {
   if (!verifyCronSecret(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -139,6 +140,9 @@ ${hashtags.join(' ')}`;
     mode,
     publishedCount: reelsToPublish.length,
   });
+}
+
+  } catch (err) { return NextResponse.json({ error: String(err), stack: err instanceof Error ? err.stack : null }, { status: 500 }); }
 }
 
 export async function GET(req: NextRequest) {
