@@ -64,7 +64,7 @@ export async function renderMenuReelVideo(menu: MenuForReel, appBaseUrl: string)
       execFileSync(ffmpeg, ['-y', '-i', audioFilePath, '-af', 'silenceremove=start_periods=1:start_silence=0.02:start_threshold=-40dB:stop_periods=-1:stop_duration=0.35:stop_threshold=-40dB', trimPath]);
       const probe = spawnSync(ffmpeg, ['-i', trimPath], { encoding: 'utf8' }).stderr || '';
       const m = probe.match(/Duration:\s*(\d+):(\d+):(\d+\.\d+)/);
-      const dur = m ? (+m * 3600 + +m * 60 + +m) : 1.8;
+      const dur = m ? (+m.at(1)*3600 + +m.at(2)*60 + +m.at(3)) : 1.8;
       const ws = sents[si].split(/\s+/).filter(Boolean);
       const syl = (w: string) => (/^\d+$/.test(w) ? 5 : Math.max(2, w.replace(/[^a-zA-Z0-9\u00C0-\u017F]/g, '').length)) + (w.endsWith(',') ? 2 : 0);
       const totC = ws.reduce((a, w) => a + syl(w), 0);
@@ -107,7 +107,7 @@ export async function renderMenuReelVideo(menu: MenuForReel, appBaseUrl: string)
 
     blocks.forEach((blk, bi) => {
       const nextBlk = blocks[bi + 1];
-      const endT = nextBlk ? nextBlk.start : cursor;
+      const endT = nextBlk ? nextBlk.at(0).at(0).start : cursor;
       blk.forEach((lineWords, li) => {
         const baseY = 1330 + li * 185;
         const charW = 35;

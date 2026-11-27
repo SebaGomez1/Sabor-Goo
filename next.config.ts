@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {\n  serverExternalPackages: ['ffmpeg-static', 'msedge-tts'],\n  outputFileTracingIncludes: { '/api/**/*': ['./node_modules/ffmpeg-static/**/*', './public/fonts/**/*'] },
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
