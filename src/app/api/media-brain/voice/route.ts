@@ -15,19 +15,18 @@ export async function GET(req: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: 'Falta texto' }, { status: 400 });
     }
-    const voice = sp.get('voice') || 'es-UY-MateoNeural';
+    const voice = sp.get('voice') || 'es-AR-TomasNeural';
     const spokenText = text
-      .replace(/Sabor\s*Goo/gi, 'Sabor Guu')
-      .replace(/\.\.\./g, ', ');
+      .replace(/Sabor\s*Goo/gi, 'Sabor Gou')
+      .replace(/! /g, '!... ')
+      .replace(/\.\.\./g, '... ');
     const tts = new MsEdgeTTS();
     await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-    const { audioStream } = await tts.toStream(spokenText, { rate: '-4%', pitch: '-6Hz' });
+    const { audioStream } = await tts.toStream(spokenText, { rate: '+9%', pitch: '+3Hz' });
     const chunks: Buffer[] = [];
     for await (const c of audioStream) chunks.push(c);
     return new NextResponse(Buffer.concat(chunks), {
       headers: { 'Content-Type': 'audio/mpeg' },
     });
-  } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
-  }
+  } catch (e) { return NextResponse.json({ error: String(e) }, { status: 500 }); }
 }
