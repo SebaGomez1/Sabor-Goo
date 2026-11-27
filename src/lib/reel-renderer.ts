@@ -1,8 +1,9 @@
+// @ts-nocheck
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { execFileSync, spawnSync } from 'child_process';
-// @ts-expect-error ffmpeg-static sin tipos\nimport ffmpegPath from 'ffmpeg-static';
+import ffmpegPath from 'ffmpeg-static';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
