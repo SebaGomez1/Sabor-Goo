@@ -1,4 +1,5 @@
-import { renderMenuReelVideo } from '@/lib/reel-renderer';\n﻿import { NextRequest, NextResponse } from 'next/server';
+import { renderMenuReelVideo } from '@/lib/reel-renderer';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret } from '@/lib/auth';
 import { getMontevideoNow } from '@/lib/logistics';
@@ -85,8 +86,14 @@ async function handleEngine1(req: NextRequest) {
         : null);
 
         const socialCaption = matchedMenu
-      ? `ðŸ”¥ ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) â€” ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}\n\nðŸ“² Pedilo AL INSTANTE en nuestra web (link en bio) â€¢ 25% OFF pidiendo 3 dÃ­as seguidos â€¢ Â¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajÃ¡s a 9, mantenÃ©s tu 25% OFF diario)!\n\n${hashtags.join(' ')}`
-      : `${reel.script_text}\n\n${hashtags.join(' ')}`;
+      ? `ðŸ”¥ ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) â€” ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}
+
+ðŸ“² Pedilo AL INSTANTE en nuestra web (link en bio) â€¢ 25% OFF pidiendo 3 dÃ­as seguidos â€¢ Â¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajÃ¡s a 9, mantenÃ©s tu 25% OFF diario)!
+
+${hashtags.join(' ')}`
+      : `${reel.script_text}
+
+${hashtags.join(' ')}`;
 
     // Si hay webhook/API de publicaciÃ³n social conectado, enviarlo con foto, precio y hashtags reales
     const socialWebhook = process.env.SOCIAL_PUBLISHER_WEBHOOK_URL;
