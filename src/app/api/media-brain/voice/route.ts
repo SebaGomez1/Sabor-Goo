@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: 'Falta texto' }, { status: 400 });
     }
-    const tts = new MsEdgeTTS(); await tts.setMetadata('es-UY-MateoNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    const tts = new MsEdgeTTS(); await tts.setMetadata('es-UY-ValentinaNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
     
-    const { audioStream } = await tts.toStream(text);
+    const { audioStream } = await tts.toStream(text.replace(/! /g,"!... ").replace(/, /g,", ... ").replace(/\. /g,". ... "),{rate:"+10%",pitch:"+3Hz"});
     const chunks: Buffer[] = [];
     for await (const c of audioStream) chunks.push(c);
     return new NextResponse(Buffer.concat(chunks), {

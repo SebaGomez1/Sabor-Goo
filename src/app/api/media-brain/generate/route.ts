@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 PÃºblico objetivo: ${targetAudience}.
 Producto destacado real del menÃº: "${productTitle}" a $${productPrice} UYU.
 DescripciÃ³n real del producto: ${productDesc}.
-Incluye obligatoriamente estos puntos con tono uruguayo natural, cercano y tentador:
+Incluye obligatoriamente estos puntos con tono uruguayo natural con ortografia perfecta y todas las tildes incluidas en el voseo como pedi, tenes, mira y ademas, usando puntos suspensivos (...), comas, puntos y signos de exclamacion como: ¡Para,!... un segundo, ¡mira esto!, cercano y tentador:
 1. Pedidos al instante: lo pedÃ­s ahora y te llega calentito directo a tu puerta, sin esperar al otro dÃ­a.
 2. Menciona el nombre exacto "${productTitle}", su precio de $${productPrice} pesos y sus ingredientes reales.
 3. Si pedÃ­s 3 dÃ­as seguidos tenÃ©s 25% OFF desde el cuarto dÃ­a.
