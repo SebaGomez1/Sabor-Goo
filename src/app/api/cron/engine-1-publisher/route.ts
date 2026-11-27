@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { renderMenuReelVideo } from '@/lib/reel-renderer';\n﻿import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { verifyCronSecret } from '@/lib/auth';
 import { getMontevideoNow } from '@/lib/logistics';
