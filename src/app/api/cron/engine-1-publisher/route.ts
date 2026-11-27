@@ -85,7 +85,8 @@ async function handleEngine1(req: NextRequest) {
         ? activeMenus[Math.floor(Math.random() * activeMenus.length)]
         : null);
 
-        const socialCaption = matchedMenu
+        let renderedVideoUrl = ""; if (matchedMenu) { try { const r = await renderMenuReelVideo(matchedMenu, new URL(req.url).origin); renderedVideoUrl = r.videoUrl; } catch (e) { console.error(e); } }
+    const socialCaption = matchedMenu
       ? `ðŸ”¥ ${matchedMenu.title} ($${matchedMenu.price_uyu} UYU) â€” ${matchedMenu.description || 'Hecho al momento y directo a tu puerta en Maldonado y Playa Mansa.'}
 
 ðŸ“² Pedilo AL INSTANTE en nuestra web (link en bio) â€¢ 25% OFF pidiendo 3 dÃ­as seguidos â€¢ Â¡Comida GRATIS mientras mantengas 10 referidos activos comprando con tu link (si bajÃ¡s a 9, mantenÃ©s tu 25% OFF diario)!
@@ -104,7 +105,7 @@ ${hashtags.join(' ')}`;
         body: JSON.stringify({
           brand: 'Sabor Goo Â· ChiveterÃ­a Maldonado',
           reelId: reel.id,
-          script: reel.script_text,
+          script: reel.script_text, videoUrl: renderedVideoUrl,
           caption: socialCaption,
           hashtags,
           productTitle: matchedMenu?.title || 'Chivito Completo',
